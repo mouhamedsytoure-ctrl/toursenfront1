@@ -14,7 +14,7 @@ import { AuthService } from '../../core/auth.service';
   template: `
     <!-- Fond vidéo floutée pleine page -->
     @if (video(); as v) {
-      <video class="bg-video" [src]="v" autoplay muted loop playsinline></video>
+      <video class="bg-video" [src]="v" autoplay muted [muted]="true" loop playsinline></video>
     }
     <div class="bg-overlay"></div>
 

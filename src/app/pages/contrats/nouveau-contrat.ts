@@ -47,7 +47,21 @@ import { Api } from '../../core/api.service';
       <input class="input" placeholder="Profession" [(ngModel)]="f.preneur_profession"/>
       <input class="input" placeholder="Nationalité" [(ngModel)]="f.preneur_nationalite"/>
       <input class="input" placeholder="Lieu de naissance" [(ngModel)]="f.preneur_lieu_naissance"/>
-      <input class="input" type="date" [(ngModel)]="f.preneur_date_naissance"/>
+      <label>Date de naissance</label>
+      <div class="row3">
+        <select class="input" [(ngModel)]="dnJour">
+          <option value="">Jour</option>
+          @for (j of jours; track j) { <option [value]="j">{{ j }}</option> }
+        </select>
+        <select class="input" [(ngModel)]="dnMois">
+          <option value="">Mois</option>
+          @for (m of mois; track m.v) { <option [value]="m.v">{{ m.l }}</option> }
+        </select>
+        <select class="input" [(ngModel)]="dnAnnee">
+          <option value="">Année</option>
+          @for (a of annees; track a) { <option [value]="a">{{ a }}</option> }
+        </select>
+      </div>
     </div>
 
     <div class="card">
@@ -97,6 +111,7 @@ import { Api } from '../../core/api.service';
     .err{color:var(--bad);margin:10px 0}
     .ok{color:var(--ok);margin:10px 0;background:#E7F1EC;padding:10px;border-radius:10px}
     .note{color:var(--muted);font-size:12px;text-align:center;margin-top:8px}
+    .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
   `],
 })
 export class NouveauContrat implements OnInit {
@@ -108,6 +123,15 @@ export class NouveauContrat implements OnInit {
   saving = signal(false);
   error = signal<string | null>(null);
   motDePasse = signal<string | null>(null);
+
+  dnJour = ''; dnMois = ''; dnAnnee = '';
+  jours = Array.from({length: 31}, (_, i) => String(i + 1).padStart(2, '0'));
+  mois = [
+    {v:'01',l:'Janvier'},{v:'02',l:'Février'},{v:'03',l:'Mars'},{v:'04',l:'Avril'},
+    {v:'05',l:'Mai'},{v:'06',l:'Juin'},{v:'07',l:'Juillet'},{v:'08',l:'Août'},
+    {v:'09',l:'Septembre'},{v:'10',l:'Octobre'},{v:'11',l:'Novembre'},{v:'12',l:'Décembre'}
+  ];
+  annees = Array.from({length: new Date().getFullYear() - 1919}, (_, i) => new Date().getFullYear() - 18 - i);
 
   f: any = {
     preneur_civilite: '', preneur_nom: '', preneur_prenom: '', preneur_telephone: '',
@@ -136,6 +160,11 @@ export class NouveauContrat implements OnInit {
     if (!this.chambre) { this.error.set('Choisissez la chambre.'); return; }
     if (!this.f.preneur_nom || !this.f.preneur_email) { this.error.set('Nom et email obligatoires.'); return; }
     if (!this.f.date_debut || !this.f.date_fin) { this.error.set('Dates de début et de fin obligatoires.'); return; }
+    if (this.dnJour && this.dnMois && this.dnAnnee) {
+      this.f.preneur_date_naissance = `${this.dnAnnee}-${this.dnMois}-${this.dnJour}`;
+    } else {
+      this.f.preneur_date_naissance = '';
+    }
     this.saving.set(true);
     try {
       const body = { ...this.f, logement_id: this.chambre.id };

@@ -28,7 +28,7 @@ export class Dashboard implements OnInit {
 
   async ngOnInit() {
     try {
-      const [stats, immeubles, contrats, paiements, recs, locs]: any = await Promise.all([
+      const results = await Promise.allSettled([
         this.api.get('/dashboard'),
         this.api.get('/immeubles'),
         this.api.get('/contrats'),
@@ -36,6 +36,11 @@ export class Dashboard implements OnInit {
         this.api.get('/reclamations'),
         this.api.get('/locataires'),
       ]);
+      const val = (r: PromiseSettledResult<any>) => r.status === 'fulfilled' ? r.value : [];
+      const [stats, immeubles, contrats, paiements, recs, locs] = results.map(val);
+
+      if (results[0].status === 'rejected') throw results[0].reason;
+
       this.d.set(stats);
       this.immeubles.set((immeubles as any[]).slice(0, 6));
 

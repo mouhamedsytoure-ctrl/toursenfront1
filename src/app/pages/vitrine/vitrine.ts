@@ -67,7 +67,15 @@ import { Api } from '../../core/api.service';
                   <p class="cloc">📍 {{ im.ville || 'Dakar' }}</p>
                   <div class="card-footer">
                     <span class="voir">Voir les détails →</span>
-                    <a class="card-contact" href="tel:+221775660377" (click)="$event.stopPropagation()">📞 Nous contacter</a>
+                    <div class="contact-wrap" (click)="$event.stopPropagation(); $event.preventDefault()">
+                      <button class="card-contact" (click)="toggleContact(im.id)">📞 Nous contacter</button>
+                      @if (contactOpen === im.id) {
+                        <div class="contact-popup">
+                          <a href="tel:+221775660377">📞 77 566 03 77</a>
+                          <a href="tel:+221777353772">📞 77 735 37 72</a>
+                        </div>
+                      }
+                    </div>
                   </div>
                 </div>
               </a>
@@ -271,12 +279,24 @@ import { Api } from '../../core/api.service';
     .cloc { color:var(--muted); font-size:13px; margin:0 0 16px; flex:1; }
     .card-footer { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
     .voir { color:var(--gold); font-weight:700; font-size:13px; }
+    .contact-wrap { position:relative; }
     .card-contact {
       background:var(--ink); color:#fff; font-size:12px; font-weight:600;
-      padding:7px 12px; border-radius:8px; text-decoration:none;
+      padding:7px 12px; border-radius:8px; border:none; cursor:pointer;
       transition:background .15s; white-space:nowrap;
     }
     .card-contact:hover { background:var(--gold); color:var(--ink); }
+    .contact-popup {
+      position:absolute; bottom:calc(100% + 8px); right:0;
+      background:#fff; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.18);
+      display:flex; flex-direction:column; overflow:hidden; min-width:180px; z-index:10;
+    }
+    .contact-popup a {
+      padding:12px 16px; font-size:14px; font-weight:600; color:var(--ink);
+      text-decoration:none; border-bottom:1px solid #f0f0f0; transition:background .15s;
+    }
+    .contact-popup a:last-child { border-bottom:none; }
+    .contact-popup a:hover { background:var(--gold); }
 
     /* SKELETON */
     .skeleton {
@@ -328,6 +348,10 @@ export class Vitrine implements OnInit {
   items = signal<any[]>([]);
   logo = environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg';
   loading = signal(true);
+  contactOpen: number | null = null;
+
+  toggleContact(id: number) { this.contactOpen = this.contactOpen === id ? null : id; }
+
   constructor(private api: Api) {}
   async ngOnInit() {
     try { this.items.set(await this.api.get('/public/immeubles')); }

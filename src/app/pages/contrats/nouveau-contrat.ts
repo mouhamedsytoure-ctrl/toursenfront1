@@ -33,30 +33,31 @@ import { Api } from '../../core/api.service';
 
     <div class="card">
       <h3>2. Identité du preneur</h3>
-      <select class="input" [(ngModel)]="f.preneur_civilite">
-        <option value="">— Civilité —</option>
+      <label class="flabel">Civilité <span class="req">*</span></label>
+      <select class="input" [class.inp-err]="submitted&&!f.preneur_civilite" [(ngModel)]="f.preneur_civilite">
+        <option value="">— Choisir —</option>
         <option value="Monsieur">Monsieur</option>
         <option value="Madame">Madame</option>
         <option value="Mademoiselle">Mademoiselle</option>
       </select>
       <label class="flabel">Nom <span class="req">*</span></label>
       <input class="input" [class.inp-err]="submitted&&!f.preneur_nom" placeholder="Nom du locataire" [(ngModel)]="f.preneur_nom"/>
-      <label class="flabel">Prénom</label>
-      <input class="input" placeholder="Prénom" [(ngModel)]="f.preneur_prenom"/>
-      <label class="flabel">Téléphone</label>
-      <input class="input" placeholder="77 000 00 00" [(ngModel)]="f.preneur_telephone"/>
+      <label class="flabel">Prénom <span class="req">*</span></label>
+      <input class="input" [class.inp-err]="submitted&&!f.preneur_prenom" placeholder="Prénom" [(ngModel)]="f.preneur_prenom"/>
+      <label class="flabel">Téléphone <span class="req">*</span></label>
+      <input class="input" [class.inp-err]="submitted&&!f.preneur_telephone" placeholder="77 000 00 00" [(ngModel)]="f.preneur_telephone"/>
       <label class="flabel">Email <span class="req">*</span></label>
       <input class="input" [class.inp-err]="submitted&&!f.preneur_email" placeholder="email@exemple.com" [(ngModel)]="f.preneur_email"/>
-      <label class="flabel">Adresse</label>
-      <input class="input" placeholder="Adresse actuelle" [(ngModel)]="f.preneur_adresse"/>
-      <label class="flabel">Profession</label>
-      <input class="input" placeholder="Profession" [(ngModel)]="f.preneur_profession"/>
-      <label class="flabel">Nationalité</label>
-      <input class="input" placeholder="Nationalité" [(ngModel)]="f.preneur_nationalite"/>
-      <label class="flabel">Lieu de naissance</label>
-      <input class="input" placeholder="Lieu de naissance" [(ngModel)]="f.preneur_lieu_naissance"/>
-      <label>Date de naissance</label>
-      <div class="row3">
+      <label class="flabel">Adresse <span class="req">*</span></label>
+      <input class="input" [class.inp-err]="submitted&&!f.preneur_adresse" placeholder="Adresse actuelle" [(ngModel)]="f.preneur_adresse"/>
+      <label class="flabel">Profession <span class="req">*</span></label>
+      <input class="input" [class.inp-err]="submitted&&!f.preneur_profession" placeholder="Profession" [(ngModel)]="f.preneur_profession"/>
+      <label class="flabel">Nationalité <span class="req">*</span></label>
+      <input class="input" [class.inp-err]="submitted&&!f.preneur_nationalite" placeholder="Nationalité" [(ngModel)]="f.preneur_nationalite"/>
+      <label class="flabel">Lieu de naissance <span class="req">*</span></label>
+      <input class="input" [class.inp-err]="submitted&&!f.preneur_lieu_naissance" placeholder="Lieu de naissance" [(ngModel)]="f.preneur_lieu_naissance"/>
+      <label class="flabel">Date de naissance <span class="req">*</span></label>
+      <div class="row3" [class.inp-err]="submitted&&(!dnJour||!dnMois||!dnAnnee)">
         <select class="input" [(ngModel)]="dnJour">
           <option value="">Jour</option>
           @for (j of jours; track j) { <option [value]="j">{{ j }}</option> }
@@ -74,30 +75,38 @@ import { Api } from '../../core/api.service';
 
     <div class="card">
       <h3>3. Pièce d'identité</h3>
+      <label class="flabel">Type de pièce <span class="req">*</span></label>
       <select class="input" [(ngModel)]="f.preneur_piece_type">
         <option value="cni">CNI</option>
         <option value="passeport">Passeport</option>
         <option value="permis">Permis</option>
         <option value="autre">Autre</option>
       </select>
-      <input class="input" placeholder="Numéro de pièce" [(ngModel)]="f.preneur_piece_numero"/>
+      <label class="flabel">Numéro de pièce <span class="req">*</span></label>
+      <input class="input" [class.inp-err]="submitted&&!f.preneur_piece_numero" placeholder="Numéro de pièce" [(ngModel)]="f.preneur_piece_numero"/>
     </div>
 
     <div class="card">
       <h3>4. Contrat</h3>
-      <input class="input" placeholder="Composition (ex: 01 Séjour, 01 Chambre...)" [(ngModel)]="f.composition"/>
+      <label class="flabel">Composition <span class="req">*</span></label>
+      <input class="input" [class.inp-err]="submitted&&!f.composition" placeholder="ex: 01 Séjour, 01 Chambre..." [(ngModel)]="f.composition"/>
+      <label class="flabel">Usage <span class="req">*</span></label>
       <select class="input" [(ngModel)]="f.usage">
         <option value="domestique">Usage domestique</option>
         <option value="commercial">Usage commercial</option>
       </select>
-      <label>Date de début</label>
-      <input class="input" type="date" [(ngModel)]="f.date_debut"/>
-      <label>Date de fin</label>
-      <input class="input" type="date" [(ngModel)]="f.date_fin"/>
-      <input class="input" type="number" placeholder="Loyer (FCFA) *" [(ngModel)]="f.montant_loyer"/>
-      <input class="input" type="number" placeholder="Caution (FCFA)" [(ngModel)]="f.caution"/>
-      <input class="input" type="number" placeholder="Jour d'échéance (1-31)" [(ngModel)]="f.jour_echeance"/>
-      <input class="input" placeholder="Mot de passe (vide = généré)" [(ngModel)]="f.password"/>
+      <label class="flabel">Date de début <span class="req">*</span></label>
+      <input class="input" [class.inp-err]="submitted&&!f.date_debut" type="date" [(ngModel)]="f.date_debut"/>
+      <label class="flabel">Date de fin <span class="req">*</span></label>
+      <input class="input" [class.inp-err]="submitted&&!f.date_fin" type="date" [(ngModel)]="f.date_fin"/>
+      <label class="flabel">Loyer (FCFA) <span class="req">*</span></label>
+      <input class="input" [class.inp-err]="submitted&&!f.montant_loyer" type="number" placeholder="ex: 150000" [(ngModel)]="f.montant_loyer"/>
+      <label class="flabel">Caution (FCFA) <span class="req">*</span></label>
+      <input class="input" [class.inp-err]="submitted&&!f.caution" type="number" placeholder="ex: 300000" [(ngModel)]="f.caution"/>
+      <label class="flabel">Jour d'échéance <span class="req">*</span></label>
+      <input class="input" [class.inp-err]="submitted&&!f.jour_echeance" type="number" placeholder="1 à 31" [(ngModel)]="f.jour_echeance"/>
+      <label class="flabel">Mot de passe (laisser vide = généré automatiquement)</label>
+      <input class="input" placeholder="Optionnel" [(ngModel)]="f.password"/>
     </div>
 
     @if (error()) { <div class="err">{{ error() }}</div> }
@@ -170,9 +179,26 @@ export class NouveauContrat implements OnInit {
   async save() {
     this.submitted = true;
     this.error.set(null);
-    if (!this.chambre) { this.error.set('Choisissez la chambre.'); return; }
-    if (!this.f.preneur_nom || !this.f.preneur_email) { this.error.set('Nom et email sont obligatoires.'); return; }
-    if (!this.f.date_debut || !this.f.date_fin) { this.error.set('Dates de début et de fin obligatoires.'); return; }
+    if (!this.chambre) { this.error.set('Choisissez un logement.'); return; }
+    const manquants = [];
+    if (!this.f.preneur_civilite) manquants.push('Civilité');
+    if (!this.f.preneur_nom) manquants.push('Nom');
+    if (!this.f.preneur_prenom) manquants.push('Prénom');
+    if (!this.f.preneur_telephone) manquants.push('Téléphone');
+    if (!this.f.preneur_email) manquants.push('Email');
+    if (!this.f.preneur_adresse) manquants.push('Adresse');
+    if (!this.f.preneur_profession) manquants.push('Profession');
+    if (!this.f.preneur_nationalite) manquants.push('Nationalité');
+    if (!this.f.preneur_lieu_naissance) manquants.push('Lieu de naissance');
+    if (!this.dnJour || !this.dnMois || !this.dnAnnee) manquants.push('Date de naissance');
+    if (!this.f.preneur_piece_numero) manquants.push('Numéro de pièce');
+    if (!this.f.composition) manquants.push('Composition');
+    if (!this.f.date_debut) manquants.push('Date de début');
+    if (!this.f.date_fin) manquants.push('Date de fin');
+    if (!this.f.montant_loyer) manquants.push('Loyer');
+    if (!this.f.caution) manquants.push('Caution');
+    if (!this.f.jour_echeance) manquants.push("Jour d'échéance");
+    if (manquants.length > 0) { this.error.set('Champs obligatoires manquants : ' + manquants.join(', ')); return; }
     if (this.dnJour && this.dnMois && this.dnAnnee) {
       this.f.preneur_date_naissance = `${this.dnAnnee}-${this.dnMois}-${this.dnJour}`;
     } else {

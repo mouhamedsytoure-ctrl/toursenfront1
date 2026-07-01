@@ -67,15 +67,10 @@ import { Api } from '../../core/api.service';
                   <p class="cloc">📍 {{ im.ville || 'Dakar' }}</p>
                   <div class="card-footer">
                     <span class="voir">Voir les détails →</span>
-                    <div class="contact-wrap" (click)="$event.stopPropagation(); $event.preventDefault()">
-                      <button class="card-contact" (click)="toggleContact(im.id)">📞 Nous contacter</button>
-                      @if (contactOpen === im.id) {
-                        <div class="contact-popup">
-                          <a href="tel:+221775660377">📞 77 566 03 77</a>
-                          <a href="tel:+221777353772">📞 77 735 37 72</a>
-                        </div>
-                      }
-                    </div>
+                  </div>
+                  <div class="card-phones" (click)="$event.stopPropagation(); $event.preventDefault()">
+                    <a class="phone-link" href="tel:+221775660377">📞 77 566 03 77</a>
+                    <a class="phone-link" href="tel:+221777353772">📞 77 735 37 72</a>
                   </div>
                 </div>
               </a>
@@ -279,24 +274,13 @@ import { Api } from '../../core/api.service';
     .cloc { color:var(--muted); font-size:13px; margin:0 0 16px; flex:1; }
     .card-footer { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
     .voir { color:var(--gold); font-weight:700; font-size:13px; }
-    .contact-wrap { position:relative; }
-    .card-contact {
-      background:var(--ink); color:#fff; font-size:12px; font-weight:600;
-      padding:7px 12px; border-radius:8px; border:none; cursor:pointer;
-      transition:background .15s; white-space:nowrap;
+    .card-phones { display:flex; gap:8px; flex-wrap:wrap; padding:0 22px 18px; }
+    .phone-link {
+      flex:1; text-align:center; background:var(--ink); color:#fff;
+      font-size:13px; font-weight:600; padding:9px 10px; border-radius:10px;
+      text-decoration:none; transition:background .15s; white-space:nowrap;
     }
-    .card-contact:hover { background:var(--gold); color:var(--ink); }
-    .contact-popup {
-      position:absolute; bottom:calc(100% + 8px); right:0;
-      background:#fff; border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,.18);
-      display:flex; flex-direction:column; overflow:hidden; min-width:180px; z-index:10;
-    }
-    .contact-popup a {
-      padding:12px 16px; font-size:14px; font-weight:600; color:var(--ink);
-      text-decoration:none; border-bottom:1px solid #f0f0f0; transition:background .15s;
-    }
-    .contact-popup a:last-child { border-bottom:none; }
-    .contact-popup a:hover { background:var(--gold); }
+    .phone-link:hover { background:var(--gold); color:var(--ink); }
 
     /* SKELETON */
     .skeleton {

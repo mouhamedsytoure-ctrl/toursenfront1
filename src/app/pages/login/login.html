@@ -4,10 +4,16 @@
     <p class="sub">Espace administration</p>
 
     <label>Email</label>
-    <input class="input" type="email" [(ngModel)]="email" placeholder="email@exemple.com" />
+    <input class="input" type="email" [(ngModel)]="email" placeholder="email@exemple.com" autocomplete="email"/>
 
     <label>Mot de passe</label>
-    <input class="input" type="password" [(ngModel)]="password" (keyup.enter)="submit()" placeholder="********" />
+    <div class="pwd-wrap">
+      <input class="input pwd-input" [type]="showPwd ? 'text' : 'password'" [(ngModel)]="password"
+             (keyup.enter)="submit()" placeholder="••••••••" autocomplete="current-password"/>
+      <button type="button" class="eye-btn" (click)="showPwd=!showPwd" tabindex="-1">
+        {{ showPwd ? '🙈' : '👁' }}
+      </button>
+    </div>
 
     @if (error()) { <div class="err">{{ error() }}</div> }
 

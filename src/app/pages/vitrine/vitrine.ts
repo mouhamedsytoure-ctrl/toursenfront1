@@ -68,7 +68,7 @@ import { Api } from '../../core/api.service';
                   <div class="card-footer">
                     <span class="voir">Voir les détails →</span>
                   </div>
-                  <div class="card-phones" (click)="$event.stopPropagation(); $event.preventDefault()">
+                  <div class="card-phones" (click)="$event.stopPropagation()">
                     <a class="phone-link" href="tel:+221775660377">📞 77 566 03 77</a>
                     <a class="phone-link" href="tel:+221777353772">📞 77 735 37 72</a>
                   </div>

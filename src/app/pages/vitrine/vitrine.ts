@@ -1,4 +1,4 @@
-import { Component, signal, OnInit, AfterViewInit, ElementRef } from '@angular/core';
+import { Component, signal, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { Api } from '../../core/api.service';
@@ -66,7 +66,8 @@ import { Api } from '../../core/api.service';
                   <h3>{{ im.nom }}</h3>
                   <p class="cloc">📍 {{ im.ville || 'Dakar' }}</p>
                   <div class="card-footer">
-                    <span class="voir">Voir →</span>
+                    <span class="voir">Voir les détails →</span>
+                    <a class="card-contact" href="tel:+221338822728" (click)="$event.stopPropagation()">📞 Nous contacter</a>
                   </div>
                 </div>
               </a>
@@ -99,7 +100,7 @@ import { Api } from '../../core/api.service';
           </div>
         </div>
         <div class="cta-strip reveal">
-          <p>Votre identifiant a été remis à la signature de votre contrat.</p>
+          <p>Vos identifiants de connexion vous seront communiqués dès la signature de votre contrat de location.</p>
           <a class="btn-gold" routerLink="/login">Se connecter →</a>
         </div>
       </div>
@@ -132,7 +133,8 @@ import { Api } from '../../core/api.service';
       background:rgba(10,28,22,.96); backdrop-filter:blur(14px);
       padding:13px 24px; box-shadow:0 1px 0 rgba(255,255,255,.06);
     }
-    .brand img { height:28px; display:block; filter:brightness(0) invert(1); }
+    .brand { background:#fff; border-radius:8px; padding:5px 10px; display:block; }
+    .brand img { height:28px; display:block; }
     .nav-btn {
       background:var(--gold); color:var(--ink); font-weight:700; font-size:13px;
       padding:9px 18px; border-radius:10px; text-decoration:none;
@@ -267,8 +269,14 @@ import { Api } from '../../core/api.service';
     .card-body { padding:20px 22px 22px; flex:1; display:flex; flex-direction:column; }
     .card-body h3 { color:var(--ink); font-size:19px; font-weight:700; margin:0 0 6px; }
     .cloc { color:var(--muted); font-size:13px; margin:0 0 16px; flex:1; }
-    .card-footer { display:flex; align-items:center; justify-content:space-between; }
-    .voir { color:var(--gold); font-weight:700; font-size:14px; }
+    .card-footer { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+    .voir { color:var(--gold); font-weight:700; font-size:13px; }
+    .card-contact {
+      background:var(--ink); color:#fff; font-size:12px; font-weight:600;
+      padding:7px 12px; border-radius:8px; text-decoration:none;
+      transition:background .15s; white-space:nowrap;
+    }
+    .card-contact:hover { background:var(--gold); color:var(--ink); }
 
     /* SKELETON */
     .skeleton {

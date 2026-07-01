@@ -67,7 +67,7 @@ import { Api } from '../../core/api.service';
                   <p class="cloc">📍 {{ im.ville || 'Dakar' }}</p>
                   <div class="card-footer">
                     <span class="voir">Voir les détails →</span>
-                    <a class="card-contact" href="tel:+221338822728" (click)="$event.stopPropagation()">📞 Nous contacter</a>
+                    <a class="card-contact" href="tel:+221775660377" (click)="$event.stopPropagation()">📞 Nous contacter</a>
                   </div>
                 </div>
               </a>
@@ -116,7 +116,7 @@ import { Api } from '../../core/api.service';
         <div>
           <p class="ftitle">Contact</p>
           <p>📍 Rue 13x12 Médina, Dakar</p>
-          <p>📞 33 882 27 28 / 77 566 03 77</p>
+          <p>📞 77 566 03 77 / 77 735 37 72</p>
           <p>✉️ toursen.immo&#64;gmail.com</p>
         </div>
       </div>

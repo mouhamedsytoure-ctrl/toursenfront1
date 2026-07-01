@@ -20,7 +20,7 @@ import { Api } from '../../core/api.service';
       <div class="hero-orb orb2"></div>
       <div class="hero-content">
         <h1><span class="txt-white anim-1">Votre logement</span><br/><span class="gold-txt anim-2">à Dakar</span></h1>
-        <p class="hero-p anim-3">Des appartements modernes gérés par Toursen Immobilier. Payez votre loyer, consultez votre contrat et signalez vos problèmes — tout depuis votre téléphone.</p>
+        <p class="hero-p anim-3">Des appartements modernes à votre portée. Payez votre loyer, consultez votre contrat et signalez vos problèmes — tout depuis votre téléphone.</p>
         <div class="hero-btns anim-4">
           <a class="btn-gold" href="#logements">Voir les logements ↓</a>
           <a class="btn-ghost" routerLink="/login">Mon espace locataire</a>

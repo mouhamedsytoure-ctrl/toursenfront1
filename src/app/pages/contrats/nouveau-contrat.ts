@@ -39,13 +39,21 @@ import { Api } from '../../core/api.service';
         <option value="Madame">Madame</option>
         <option value="Mademoiselle">Mademoiselle</option>
       </select>
-      <input class="input" placeholder="Nom *" [(ngModel)]="f.preneur_nom"/>
+      <label class="flabel">Nom <span class="req">*</span></label>
+      <input class="input" [class.inp-err]="submitted&&!f.preneur_nom" placeholder="Nom du locataire" [(ngModel)]="f.preneur_nom"/>
+      <label class="flabel">Prénom</label>
       <input class="input" placeholder="Prénom" [(ngModel)]="f.preneur_prenom"/>
-      <input class="input" placeholder="Téléphone" [(ngModel)]="f.preneur_telephone"/>
-      <input class="input" placeholder="Email *" [(ngModel)]="f.preneur_email"/>
-      <input class="input" placeholder="Adresse" [(ngModel)]="f.preneur_adresse"/>
+      <label class="flabel">Téléphone</label>
+      <input class="input" placeholder="77 000 00 00" [(ngModel)]="f.preneur_telephone"/>
+      <label class="flabel">Email <span class="req">*</span></label>
+      <input class="input" [class.inp-err]="submitted&&!f.preneur_email" placeholder="email@exemple.com" [(ngModel)]="f.preneur_email"/>
+      <label class="flabel">Adresse</label>
+      <input class="input" placeholder="Adresse actuelle" [(ngModel)]="f.preneur_adresse"/>
+      <label class="flabel">Profession</label>
       <input class="input" placeholder="Profession" [(ngModel)]="f.preneur_profession"/>
+      <label class="flabel">Nationalité</label>
       <input class="input" placeholder="Nationalité" [(ngModel)]="f.preneur_nationalite"/>
+      <label class="flabel">Lieu de naissance</label>
       <input class="input" placeholder="Lieu de naissance" [(ngModel)]="f.preneur_lieu_naissance"/>
       <label>Date de naissance</label>
       <div class="row3">
@@ -112,6 +120,9 @@ import { Api } from '../../core/api.service';
     .ok{color:var(--ok);margin:10px 0;background:#E7F1EC;padding:10px;border-radius:10px}
     .note{color:var(--muted);font-size:12px;text-align:center;margin-top:8px}
     .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+    .flabel{display:block;font-size:12px;color:var(--muted);font-weight:600;margin:8px 0 4px}
+    .req{color:var(--bad)}
+    .inp-err{border-color:var(--bad)!important;background:#fff8f8}
   `],
 })
 export class NouveauContrat implements OnInit {
@@ -123,6 +134,7 @@ export class NouveauContrat implements OnInit {
   saving = signal(false);
   error = signal<string | null>(null);
   motDePasse = signal<string | null>(null);
+  submitted = false;
 
   dnJour = ''; dnMois = ''; dnAnnee = '';
   jours = Array.from({length: 31}, (_, i) => String(i + 1).padStart(2, '0'));
@@ -156,9 +168,10 @@ export class NouveauContrat implements OnInit {
   onChambre(l: any) { if (l && !this.f.montant_loyer) this.f.montant_loyer = Math.round(l.loyer); }
 
   async save() {
+    this.submitted = true;
     this.error.set(null);
     if (!this.chambre) { this.error.set('Choisissez la chambre.'); return; }
-    if (!this.f.preneur_nom || !this.f.preneur_email) { this.error.set('Nom et email obligatoires.'); return; }
+    if (!this.f.preneur_nom || !this.f.preneur_email) { this.error.set('Nom et email sont obligatoires.'); return; }
     if (!this.f.date_debut || !this.f.date_fin) { this.error.set('Dates de début et de fin obligatoires.'); return; }
     if (this.dnJour && this.dnMois && this.dnAnnee) {
       this.f.preneur_date_naissance = `${this.dnAnnee}-${this.dnMois}-${this.dnJour}`;

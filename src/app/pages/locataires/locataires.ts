@@ -11,7 +11,7 @@ import { AuthService } from '../../core/auth.service';
   template: `
     <div class="head">
       <h1 class="ptitle">Locataires</h1>
-      @if (admin()) { <a class="btn-add" routerLink="/app/contrats/nouveau">+ Nouveau locataire</a> }
+      @if (admin()) { <a class="btn-add" routerLink="/app/contrats/nouveau">+ Nouveau contrat / locataire</a> }
     </div>
     <input class="input search" placeholder="Rechercher par nom..." [(ngModel)]="q" />
     @if (loading()) { <p class="muted">Chargement...</p> }

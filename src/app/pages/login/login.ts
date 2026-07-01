@@ -15,6 +15,7 @@ export class Login {
   logo = environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg';
   email = '';
   password = '';
+  showPwd = false;
   loading = signal(false);
   error = signal<string | null>(null);
 

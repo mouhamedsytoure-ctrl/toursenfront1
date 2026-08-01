@@ -1,0 +1,45 @@
+<div class="login-wrap">
+  <div class="login-card">
+    <p class="sub">Creer votre espace agence</p>
+
+    <label>Nom de l'agence</label>
+    <input class="input" [(ngModel)]="agenceNom" (ngModelChange)="onNomChange()" placeholder="Mon Agence Immo"/>
+
+    <label>Identifiant (slug)</label>
+    <input class="input" [(ngModel)]="agenceSlug" (ngModelChange)="onSlugChange()" placeholder="mon-agence-immo"/>
+
+    <label>Telephone de l'agence</label>
+    <input class="input" [(ngModel)]="agenceTelephone" placeholder="77 000 00 00"/>
+
+    <label>Ville</label>
+    <input class="input" [(ngModel)]="agenceVille" placeholder="Dakar"/>
+
+    <hr/>
+
+    <label>Votre nom</label>
+    <input class="input" [(ngModel)]="adminNom" placeholder="Prenom Nom"/>
+
+    <label>Votre email</label>
+    <input class="input" type="email" [(ngModel)]="adminEmail" placeholder="email@exemple.com" autocomplete="email"/>
+
+    <label>Votre telephone</label>
+    <input class="input" [(ngModel)]="adminTelephone" placeholder="77 000 00 00"/>
+
+    <label>Mot de passe</label>
+    <div class="pwd-wrap">
+      <input class="input pwd-input" [type]="showPwd ? 'text' : 'password'" [(ngModel)]="adminPassword"
+             (keyup.enter)="submit()" placeholder="8 caracteres minimum" autocomplete="new-password"/>
+      <button type="button" class="eye-btn" (click)="showPwd=!showPwd" tabindex="-1">
+        {{ showPwd ? '🙈' : '👁' }}
+      </button>
+    </div>
+
+    @if (error()) { <div class="err">{{ error() }}</div> }
+
+    <button class="btn btn-ink full" [disabled]="loading()" (click)="submit()">
+      {{ loading() ? 'Creation...' : 'Creer mon agence' }}
+    </button>
+
+    <a class="vitrine-lien" routerLink="/login">Deja un compte ? Se connecter →</a>
+  </div>
+</div>

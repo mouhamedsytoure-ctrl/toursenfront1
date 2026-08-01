@@ -2,11 +2,13 @@ import { Routes } from '@angular/router';
 import { adminGuard, locataireGuard } from './core/role.guard';
 
 export const routes: Routes = [
-  { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.Login) },
+  { path: 'login',       loadComponent: () => import('./pages/login/login').then(m => m.Login) },
+  { path: 'inscription', loadComponent: () => import('./pages/inscription/inscription').then(m => m.Inscription) },
 
-  // Vitrine publique (visiteurs, sans connexion)
-  { path: 'vitrine',     loadComponent: () => import('./pages/vitrine/vitrine').then(m => m.Vitrine) },
-  { path: 'vitrine/:id', loadComponent: () => import('./pages/vitrine/vitrine-detail').then(m => m.VitrineDetail) },
+  // Vitrine publique (visiteurs, sans connexion), une par agence (slug dans l'URL)
+  
+  { path: 'vitrine/:slug',      loadComponent: () => import('./pages/vitrine/vitrine').then(m => m.Vitrine) },
+  { path: 'vitrine/:slug/:id',  loadComponent: () => import('./pages/vitrine/vitrine-detail').then(m => m.VitrineDetail) },
   { path: 'apropos',     loadComponent: () => import('./pages/apropos/apropos').then(m => m.Apropos) },
 
   // Espace locataire (responsive : ordinateur ET telephone, iPhone inclus)
@@ -28,12 +30,10 @@ export const routes: Routes = [
       { path: 'contrats/:id',     loadComponent: () => import('./pages/contrats/contrat-detail').then(m => m.ContratDetail) },
       { path: 'loyers',           loadComponent: () => import('./pages/loyers/loyers').then(m => m.Loyers) },
       { path: 'reclamations',     loadComponent: () => import('./pages/reclamations/reclamations').then(m => m.Reclamations) },
-      { path: 'transferts',      loadComponent: () => import('./pages/transferts/transferts').then(m => m.Transferts) },
-      { path: 'envois',          loadComponent: () => import('./pages/envois/envois').then(m => m.Envois) },
       { path: 'utilisateurs',     loadComponent: () => import('./pages/utilisateurs/utilisateurs').then(m => m.Utilisateurs) },
     ],
   },
 
-  { path: '', pathMatch: 'full', redirectTo: 'vitrine' },
-  { path: '**', redirectTo: 'vitrine' },
+  { path: '', pathMatch: 'full', redirectTo: 'vitrine/sits' },
+{ path: '**', redirectTo: 'vitrine/sits' },
 ];

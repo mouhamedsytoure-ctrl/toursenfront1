@@ -1,5 +1,5 @@
 import { Component, signal, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { environment } from '../../../environments/environment';
 import { Api } from '../../core/api.service';
 
@@ -10,7 +10,7 @@ import { Api } from '../../core/api.service';
   template: `
     <!-- NAV -->
     <nav class="nav">
-      <a class="brand" routerLink="/apropos"><img [src]="logo" alt="Toursen"/></a>
+      <a class="brand" routerLink="/apropos"><img [src]="logo()" alt="{{ agenceNom() }}"/></a>
       <a class="nav-btn" routerLink="/login">Mon espace →</a>
     </nav>
 
@@ -45,12 +45,14 @@ import { Api } from '../../core/api.service';
           <div class="grid">
             @for (s of [1,2,3,4,5,6]; track s) { <div class="skeleton"></div> }
           </div>
+        } @else if (error()) {
+          <p class="empty">{{ error() }}</p>
         } @else if (items().length === 0) {
           <p class="empty">Aucun logement disponible pour le moment.</p>
         } @else {
           <div class="grid">
             @for (im of items(); track im.id; let i = $index) {
-              <a class="card reveal" [routerLink]="['/vitrine', im.id]" [style.animation-delay]="(i*100)+'ms'">
+              <a class="card reveal" [routerLink]="['/vitrine', slug, im.id]" [style.animation-delay]="(i*100)+'ms'">
                 <div class="card-img">
                   @if (cover(im); as c) {
                     <img [src]="c" alt="{{ im.nom }}"/>
@@ -113,7 +115,7 @@ import { Api } from '../../core/api.service';
     <footer class="footer">
       <div class="footer-grid">
         <div>
-          <img [src]="logo" alt="Toursen" class="flogo"/>
+          <img [src]="logo()" alt="{{ agenceNom() }}" class="flogo"/>
           <p class="fdesc">Votre partenaire immobilier à Dakar.</p>
         </div>
         <div>
@@ -330,16 +332,28 @@ import { Api } from '../../core/api.service';
 })
 export class Vitrine implements OnInit {
   items = signal<any[]>([]);
-  logo = environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg';
+  agence = signal<{ nom: string; logo: string | null; telephone: string | null } | null>(null);
   loading = signal(true);
+  error = signal<string | null>(null);
   contactOpen: number | null = null;
+  slug = '';
+
+  // Logo de l'agence si defini, sinon logo Toursen par defaut
+  logo = () => this.agence()?.logo || (environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg');
+  agenceNom = () => this.agence()?.nom || 'Toursen';
 
   toggleContact(id: number) { this.contactOpen = this.contactOpen === id ? null : id; }
 
-  constructor(private api: Api) {}
+  constructor(private api: Api, private route: ActivatedRoute) {}
   async ngOnInit() {
-    try { this.items.set(await this.api.get('/public/immeubles')); }
-    finally { this.loading.set(false); }
+    this.slug = this.route.snapshot.paramMap.get('slug') || 'sits';
+    try {
+      const res: any = await this.api.get('/public/' + this.slug + '/immeubles');
+      this.agence.set(res.agence);
+      this.items.set(res.immeubles);
+    } catch {
+      this.error.set("Cette agence est introuvable ou momentanement indisponible.");
+    } finally { this.loading.set(false); }
   }
   cover(im: any): string | null {
     const m = (im.medias || []).find((x: any) => x.type === 'photo' && x.url);

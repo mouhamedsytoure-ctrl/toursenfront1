@@ -1,7 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
-import { environment } from '../../../environments/environment';
 
 interface MenuItem { label: string; path: string; icon: string; superAdminOnly?: boolean; }
 
@@ -13,7 +12,11 @@ interface MenuItem { label: string; path: string; icon: string; superAdminOnly?:
   styleUrl: './shell.scss',
 })
 export class Shell {
-  logo = environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg';
+  // Pas de repli sur le logo Toursen ici : une nouvelle agence sans logo
+  // ne doit pas voir la marque d'une autre agence. Le template affiche
+  // un pictogramme generique si logo() est null.
+  logo = () => this.auth.agence()?.logo ?? null;
+  agenceNom = () => this.auth.agence()?.nom || 'Toursen Immobilier';
   open = signal(false); // menu mobile
 
   menu: MenuItem[] = [
@@ -24,8 +27,6 @@ export class Shell {
     { label: 'Contrats',        path: '/app/contrats',     icon: '📄' },
     { label: 'Loyers',          path: '/app/loyers',       icon: '💰' },
     { label: 'Réclamations',    path: '/app/reclamations', icon: '🛠' },
-    { label: 'Transferts',      path: '/app/transferts',   icon: '💸' },
-    { label: 'Envois',          path: '/app/envois',       icon: '📨' },
     { label: 'Utilisateurs',    path: '/app/utilisateurs', icon: '🔑', superAdminOnly: true },
   ];
 

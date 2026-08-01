@@ -9,8 +9,8 @@ import { Api, fcfa } from '../../core/api.service';
   imports: [RouterLink],
   template: `
     <header class="top">
-      <a routerLink="/vitrine" class="back">←</a>
-      <a class="brandbox" routerLink="/apropos"><img [src]="logo" alt="SITS"/></a>
+      <a [routerLink]="['/vitrine', slug]" class="back">←</a>
+      <a class="brandbox" routerLink="/apropos"><img [src]="logo()" alt="{{ agenceNom() }}"/></a>
       <a class="lien" routerLink="/login">Connexion</a>
     </header>
 
@@ -21,6 +21,7 @@ import { Api, fcfa } from '../../core/api.service';
     <div class="bg-overlay"></div>
 
     @if (loading()) { <p class="muted pad">Chargement...</p> }
+    @else if (error()) { <p class="muted pad">{{ error() }}</p> }
     @else if (im(); as m) {
       <div class="hero-title">
         <h1>{{ m.nom }}</h1>
@@ -109,18 +110,28 @@ import { Api, fcfa } from '../../core/api.service';
   `],
 })
 export class VitrineDetail implements OnInit {
-  logo = environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg';
+  agence = signal<{ nom: string; logo: string | null; telephone: string | null } | null>(null);
+  logo = () => this.agence()?.logo || (environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg');
+  agenceNom = () => this.agence()?.nom || 'Toursen';
   im = signal<any>(null);
   loading = signal(true);
+  error = signal<string | null>(null);
   gallery = signal<string[] | null>(null);
   big = signal<string | null>(null);
   private _galTitre = '';
   fcfa = fcfa;
+  slug = '';
   constructor(private api: Api, private route: ActivatedRoute) {}
   async ngOnInit() {
+    this.slug = this.route.snapshot.paramMap.get('slug') || 'sits';
     const id = this.route.snapshot.paramMap.get('id');
-    try { this.im.set(await this.api.get('/public/immeubles/' + id)); }
-    finally { this.loading.set(false); }
+    try {
+      const res: any = await this.api.get('/public/' + this.slug + '/immeubles/' + id);
+      this.agence.set(res.agence);
+      this.im.set(res.immeuble);
+    } catch {
+      this.error.set("Ce logement est introuvable ou momentanement indisponible.");
+    } finally { this.loading.set(false); }
   }
   video(): string | null { const m = (this.im()?.medias || []).find((x: any) => x.type === 'video' && x.url); return m?.url || null; }
   photos(): any[] { return (this.im()?.medias || []).filter((x: any) => x.type === 'photo' && x.url); }

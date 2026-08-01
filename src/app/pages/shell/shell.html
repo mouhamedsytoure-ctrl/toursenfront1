@@ -1,7 +1,13 @@
 <div class="layout">
   <!-- Sidebar -->
   <aside class="sidebar" [class.open]="open()">
-    <a class="brandbox" routerLink="/apropos" title="A propos"><img [src]="logo" alt="SITS"/></a>
+    <a class="brandbox" routerLink="/apropos" title="A propos">
+      @if (logo(); as l) {
+        <img [src]="l" alt="{{ agenceNom() }}"/>
+      } @else {
+        <span class="brand-pictogram">🏢</span>
+      }
+    </a>
     <nav>
       @for (m of visibleMenu(); track m.path) {
         <a [routerLink]="m.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: m.path === '/app' }" (click)="open.set(false)">
@@ -20,7 +26,7 @@
   <div class="main">
     <header class="topbar">
       <button class="burger" (click)="open.set(!open())">☰</button>
-      <span class="ttl">Toursen Immobilier</span>
+      <span class="ttl">{{ agenceNom() }}</span>
     </header>
     <div class="page">
       <router-outlet></router-outlet>

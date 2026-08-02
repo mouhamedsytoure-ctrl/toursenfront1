@@ -12,6 +12,7 @@
       @for (m of visibleMenu(); track m.path) {
         <a [routerLink]="m.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: m.path === '/app' }" (click)="open.set(false)">
           <span class="ic">{{ m.icon }}</span> {{ m.label }}
+          @if (m.proOnly && !estProOuPlus()) { <span class="badge-pro">Pro</span> }
         </a>
       }
     </nav>
@@ -28,6 +29,12 @@
       <button class="burger" (click)="open.set(!open())">☰</button>
       <span class="ttl">{{ agenceNom() }}</span>
     </header>
+    @if (bandeau(); as b) {
+      <div class="bandeau" [class.urgent]="b.urgent">
+        <span>{{ b.texte }}</span>
+        <a routerLink="/abonnement">Voir les formules →</a>
+      </div>
+    }
     <div class="page">
       <router-outlet></router-outlet>
     </div>

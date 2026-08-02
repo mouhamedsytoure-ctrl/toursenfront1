@@ -145,7 +145,7 @@ import { RouterLink } from '@angular/router';
             <div class="prix"><strong>{{ f.prix }}</strong><span> FCFA / mois</span></div>
             <p class="q">{{ f.quota }}</p>
             <ul>@for (x of f.atouts; track x) { <li>{{ x }}</li> }</ul>
-            <a class="btn" routerLink="/inscription">Essayer</a>
+            <a class="btn" [routerLink]="['/inscription']" [queryParams]="{ plan: f.cle }">Essayer</a>
           </div>
         }
       </div>
@@ -342,11 +342,11 @@ export class Accueil implements AfterViewInit, OnDestroy {
   ];
 
   formules = [
-    { nom: 'Standard', prix: '10 000', quota: "Jusqu'a 2 logements",
+    { cle: 'starter', nom: 'Standard', prix: '10 000', quota: "Jusqu'a 2 logements",
       atouts: ['Contrats et baux', 'Suivi des loyers', 'Quittances PDF', 'Vitrine en ligne'] },
-    { nom: 'Pro', prix: '25 000', quota: "Jusqu'a 6 logements", phare: true,
+    { cle: 'pro', nom: 'Pro', prix: '25 000', quota: "Jusqu'a 6 logements", phare: true,
       atouts: ['Tout le Standard', 'Statistiques avancees', 'Plusieurs utilisateurs', 'Support prioritaire'] },
-    { nom: 'VIP', prix: '50 000', quota: 'Logements illimites',
+    { cle: 'illimite', nom: 'VIP', prix: '50 000', quota: 'Logements illimites',
       atouts: ['Tout le Pro', 'Annonces mises en avant', 'Accompagnement dedie'] },
   ];
 

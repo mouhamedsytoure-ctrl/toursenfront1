@@ -36,6 +36,13 @@
     <div class="insc-form">
       <p class="sub">Creer votre espace agence</p>
 
+      @if (planSouhaite) {
+        <div class="plan-choisi">
+          Formule <strong>{{ libellePlanSouhaite() }}</strong> selectionnee — votre essai gratuit de 14 jours
+          commence d'abord, sans engagement. Vous pourrez y passer a tout moment.
+        </div>
+      }
+
       <div class="etape">
         <span class="etape-ic">🏢</span>
         <div class="etape-txt"><strong>Votre agence</strong><small>Nom, identifiant, coordonnees</small></div>

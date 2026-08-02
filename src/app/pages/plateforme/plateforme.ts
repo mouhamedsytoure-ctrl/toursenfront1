@@ -8,7 +8,7 @@ type AgenceLigne = {
   id: number; nom: string; slug: string; ville: string | null; telephone: string | null;
   plan: string; plan_libelle: string; prix_mensuel: number;
   plan_souhaite: string | null; plan_souhaite_libelle: string | null;
-  statut: string; active: boolean;
+  statut: string; motif_suspension: string | null; note_suspension: string | null; active: boolean;
   quota_logements: number; max_utilisateurs: number; nb_logements: number; nb_utilisateurs: number;
   essai_termine_le: string | null; jours_restants: number | null; inscrite_le: string;
 };
@@ -85,6 +85,12 @@ type Stats = {
                 <span class="pill" [class.ok]="a.active" [class.ko]="!a.active">
                   {{ a.active ? 'Actif' : (a.statut === 'suspendu' ? 'Suspendu' : 'Expiré') }}
                 </span>
+                @if (a.statut === 'suspendu') {
+                  <div class="motif-susp">
+                    {{ a.motif_suspension === 'autre' ? 'Autre motif' : 'Defaut de paiement' }}
+                    @if (a.note_suspension) { <span class="note-susp"> · {{ a.note_suspension }}</span> }
+                  </div>
+                }
               </td>
               <td class="num">
                 {{ a.nb_logements }}<span class="slug">/{{ a.quota_logements || '∞' }}</span>
@@ -98,10 +104,33 @@ type Stats = {
                 @if (a.statut === 'suspendu') {
                   <button class="mini" (click)="changerStatut(a, 'actif')">Réactiver</button>
                 } @else {
-                  <button class="mini ko" (click)="changerStatut(a, 'suspendu')">Suspendre</button>
+                  <button class="mini ko" (click)="ouvrirSuspension(a)">Suspendre</button>
                 }
               </td>
             </tr>
+            @if (suspensionEnCours() === a.id) {
+              <tr class="ligne-susp">
+                <td colspan="6">
+                  <div class="form-susp">
+                    <label>
+                      Motif
+                      <select [(ngModel)]="motifChoisi">
+                        <option value="paiement">Defaut de paiement (l'agence pourra se reactiver en payant)</option>
+                        <option value="autre">Autre motif (paiement bloque, contact obligatoire)</option>
+                      </select>
+                    </label>
+                    <label class="note-lab">
+                      Note affichee a l'agence (optionnel)
+                      <input class="note-input" [(ngModel)]="noteChoisie" placeholder="Ex : reclamation en cours"/>
+                    </label>
+                    <div class="form-susp-actions">
+                      <button class="mini ko" (click)="confirmerSuspension(a)">Confirmer la suspension</button>
+                      <button class="mini" (click)="suspensionEnCours.set(null)">Annuler</button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            }
           } @empty {
             <tr><td colspan="6" class="muted">Aucune agence inscrite pour le moment.</td></tr>
           }
@@ -130,6 +159,15 @@ type Stats = {
     .num { text-align:right; }
     .slug { color:#9ca3af; font-size:12px; margin-left:6px; }
     .souhaite { color:#c9922f; font-size:11px; font-weight:600; margin-top:4px; }
+    .motif-susp { color:#991b1b; font-size:11px; margin-top:4px; max-width: 220px; }
+    .note-susp { color:#6b7280; font-style: italic; }
+    .ligne-susp td { background:#fafafa; padding: 16px 14px; }
+    .form-susp { display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; }
+    .form-susp label { display:flex; flex-direction:column; gap:4px; font-size:12px; color:#6b7280; font-weight:600; }
+    .form-susp select { min-width: 260px; }
+    .note-lab { flex: 1; min-width: 220px; }
+    .note-input { padding:7px 10px; border:1px solid #d1d5db; border-radius:8px; font-size:13px; font-weight:400; }
+    .form-susp-actions { display:flex; gap:8px; }
     .pill { padding:3px 10px; border-radius:999px; font-size:12px; }
     .pill.ok { background:#dcfce7; color:#166534; }
     .pill.ko { background:#fee2e2; color:#991b1b; }
@@ -148,6 +186,10 @@ export class Plateforme implements OnInit {
   stats   = signal<Stats | null>(null);
   loading = signal(true);
   erreur  = signal('');
+
+  suspensionEnCours = signal<number | null>(null);
+  motifChoisi: 'paiement' | 'autre' = 'paiement';
+  noteChoisie = '';
 
   constructor(private api: Api, private auth: AuthService, private router: Router) {}
 
@@ -178,6 +220,21 @@ export class Plateforme implements OnInit {
 
   async changerStatut(a: AgenceLigne, statut: string) {
     await this.majAgence(a, { statut });
+  }
+
+  ouvrirSuspension(a: AgenceLigne) {
+    this.motifChoisi = 'paiement';
+    this.noteChoisie = '';
+    this.suspensionEnCours.set(a.id);
+  }
+
+  async confirmerSuspension(a: AgenceLigne) {
+    await this.majAgence(a, {
+      statut: 'suspendu',
+      motif_suspension: this.motifChoisi,
+      note_suspension: this.noteChoisie.trim() || null,
+    });
+    this.suspensionEnCours.set(null);
   }
 
   private async majAgence(a: AgenceLigne, corps: any) {

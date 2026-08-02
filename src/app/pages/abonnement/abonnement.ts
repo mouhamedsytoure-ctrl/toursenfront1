@@ -12,11 +12,11 @@ type Formule = { cle: string; nom: string; prix: number; logements: string; atou
   template: `
   <div class="abo">
     <div class="tete">
-      <span class="badge">{{ suspendu() ? 'Compte suspendu' : "Periode d'essai terminee" }}</span>
-      <h1>{{ suspendu() ? 'Votre acces a ete suspendu' : 'Votre essai gratuit est termine' }}</h1>
+      <span class="badge" [class.grave]="motifAutre()">{{ badge() }}</span>
+      <h1>{{ titre() }}</h1>
       <p class="intro">
-        @if (suspendu()) {
-          Contactez-nous pour regulariser la situation et retrouver l'acces a votre espace.
+        @if (motifAutre()) {
+          {{ abo.blocage()?.note_suspension || "Contactez-nous pour regulariser la situation et retrouver l'acces a votre espace." }}
         } @else {
           Vos donnees sont intactes et vous attendent. Choisissez une formule pour reprendre la gestion
           de {{ nomAgence() }}.
@@ -33,7 +33,7 @@ type Formule = { cle: string; nom: string; prix: number; logements: string; atou
 
     @if (erreurPaiement()) { <p class="err">{{ erreurPaiement() }}</p> }
 
-    @if (!suspendu()) {
+    @if (!motifAutre()) {
       <div class="formules">
         @for (f of formules; track f.cle) {
           <div class="f" [class.phare]="f.phare">
@@ -54,12 +54,17 @@ type Formule = { cle: string; nom: string; prix: number; logements: string; atou
     }
 
     <div class="contact">
-      <h3>Paiement manuel (Wave / Orange Money)</h3>
-      <p>
-        Envoyez le montant par <strong>Wave</strong> ou <strong>Orange Money</strong> au
-        <strong>{{ tel }}</strong>, puis envoyez-nous la confirmation.
-        Votre acces est reactive dans la journee.
-      </p>
+      @if (motifAutre()) {
+        <h3>Nous contacter</h3>
+        <p>Ecrivez-nous sur WhatsApp pour regulariser votre situation.</p>
+      } @else {
+        <h3>Paiement manuel (Wave / Orange Money)</h3>
+        <p>
+          Envoyez le montant par <strong>Wave</strong> ou <strong>Orange Money</strong> au
+          <strong>{{ tel }}</strong>, puis envoyez-nous la confirmation.
+          Votre acces est reactive dans la journee.
+        </p>
+      }
       <div class="actions">
         <a class="btn plein" [href]="'https://wa.me/' + telBrut" target="_blank" rel="noopener">Nous ecrire sur WhatsApp</a>
         <button class="btn" (click)="deconnexion()">Se deconnecter</button>
@@ -71,6 +76,7 @@ type Formule = { cle: string; nom: string; prix: number; logements: string; atou
     .abo { max-width:1000px; margin:0 auto; padding:48px 24px; }
     .tete { text-align:center; margin-bottom:36px; }
     .badge { display:inline-block; background:#fef3c7; color:#92400e; padding:5px 14px; border-radius:99px; font-size:13px; }
+    .badge.grave { background:#fee2e2; color:#991b1b; }
     h1 { font-size:30px; margin:14px 0 10px; }
     .intro { color:#6b7280; max-width:560px; margin:0 auto; line-height:1.6; }
     .verif { text-align:center; background:#eef6f1; border:1px solid #d7e8dc; border-radius:12px; padding:16px; margin-bottom:24px; }
@@ -100,7 +106,7 @@ type Formule = { cle: string; nom: string; prix: number; logements: string; atou
   `],
 })
 export class Abonnement implements OnInit {
-  private abo = inject(AbonnementService);
+  abo = inject(AbonnementService);
   private auth = inject(AuthService);
   private api = inject(Api);
   private router = inject(Router);
@@ -113,8 +119,28 @@ export class Abonnement implements OnInit {
   erreurPaiement = signal('');
   verification = signal(false);
 
-  suspendu = computed(() => this.abo.blocage()?.motif === 'suspendu');
+  motif = computed(() => this.abo.blocage()?.motif);
+  // Paiement inutile : seul un contact direct avec le proprietaire de la plateforme peut debloquer.
+  motifAutre = computed(() => this.motif() === 'suspendu_autre');
   nomAgence = computed(() => this.abo.blocage()?.agence?.nom || this.auth.agence()?.nom || 'votre agence');
+
+  badge(): string {
+    switch (this.motif()) {
+      case 'suspendu_autre':
+      case 'suspendu_paiement': return 'Compte suspendu';
+      case 'abonnement_expire': return 'Abonnement expire';
+      default: return "Periode d'essai terminee";
+    }
+  }
+
+  titre(): string {
+    switch (this.motif()) {
+      case 'suspendu_autre':
+      case 'suspendu_paiement': return 'Votre acces a ete suspendu';
+      case 'abonnement_expire': return 'Votre abonnement est arrive a expiration';
+      default: return 'Votre essai gratuit est termine';
+    }
+  }
 
   formules: Formule[] = [
     { cle: 'starter', nom: 'Standard', prix: 10000, logements: "Jusqu'a 2 logements",

@@ -17,7 +17,7 @@ export const abonnementInterceptor: HttpInterceptorFn = (req, next) => {
   // Motifs qui bloquent toute l'application (bascule sur /abonnement).
   // Tout autre motif 402 (quota_atteint, utilisateurs_atteint, ...) est une
   // limite ponctuelle : le formulaire concerne affiche le message lui-meme.
-  const motifsBlocage = ['essai_termine', 'suspendu'];
+  const motifsBlocage = ['essai_termine', 'abonnement_expire', 'suspendu_paiement', 'suspendu_autre'];
 
   return next(req).pipe(
     catchError((e: HttpErrorResponse) => {
@@ -30,6 +30,7 @@ export const abonnementInterceptor: HttpInterceptorFn = (req, next) => {
         abo.blocage.set({
           motif: e.error?.motif ?? 'essai_termine',
           message: e.error?.message ?? '',
+          note_suspension: e.error?.note_suspension ?? null,
           agence: e.error?.agence ?? null,
         });
 

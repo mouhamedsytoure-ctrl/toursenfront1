@@ -1,7 +1,11 @@
 import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
+
+const LIBELLES_PLAN: Record<string, string> = {
+  starter: 'Standard', pro: 'Pro', illimite: 'VIP',
+};
 
 @Component({
   selector: 'app-inscription',
@@ -11,6 +15,11 @@ import { AuthService } from '../../core/auth.service';
   styleUrl: './inscription.scss',
 })
 export class Inscription {
+  // Formule cliquee sur la page tarifs (informatif : l'inscription reste
+  // toujours un essai gratuit, ceci sert juste a prevenir le proprietaire
+  // de la plateforme de la formule qui interesse cette agence).
+  planSouhaite: string | null = null;
+
   agenceNom = '';
   agenceSlug = '';
   slugModifieManuellement = false;
@@ -24,7 +33,14 @@ export class Inscription {
   loading = signal(false);
   error = signal<string | null>(null);
 
-  constructor(private auth: AuthService, private router: Router) {}
+  constructor(private auth: AuthService, private router: Router, route: ActivatedRoute) {
+    const plan = route.snapshot.queryParamMap.get('plan');
+    this.planSouhaite = plan && LIBELLES_PLAN[plan] ? plan : null;
+  }
+
+  libellePlanSouhaite(): string {
+    return this.planSouhaite ? LIBELLES_PLAN[this.planSouhaite] : '';
+  }
 
   // Propose un slug a partir du nom de l'agence tant que l'utilisateur ne l'a pas modifie lui-meme
   onNomChange(): void {
@@ -55,6 +71,7 @@ export class Inscription {
         agence_slug: this.agenceSlug.trim(),
         agence_telephone: this.agenceTelephone.trim() || undefined,
         agence_ville: this.agenceVille.trim() || undefined,
+        plan_souhaite: this.planSouhaite || undefined,
         admin_nom: this.adminNom.trim(),
         admin_email: this.adminEmail.trim(),
         admin_password: this.adminPassword,

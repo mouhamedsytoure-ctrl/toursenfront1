@@ -10,8 +10,15 @@ export interface AppAgence {
   telephone: string | null;
   ville: string | null;
   plan: string;
+  plan_souhaite: string | null;
   statut: string;
+  active: boolean;
   essai_termine_le: string | null;
+  jours_restants: number | null;
+  quota_logements: number;
+  nb_logements: number;
+  max_utilisateurs: number;
+  nb_utilisateurs: number;
 }
 
 export interface AppUser {
@@ -59,12 +66,30 @@ export class AuthService {
 
   async register(data: {
     agence_nom: string; agence_slug: string; agence_telephone?: string; agence_ville?: string;
+    plan_souhaite?: string;
     admin_nom: string; admin_email: string; admin_password: string; admin_telephone?: string;
   }): Promise<void> {
     const res: any = await firstValueFrom(
       this.http.post(`${environment.apiUrl}/register`, data)
     );
     this.setSession(res);
+  }
+
+  // Recharge le bloc agence (quota, nb utilisateurs, jours restants) depuis /me.
+  // A appeler quand on entre dans l'espace de gestion, pour ne pas afficher
+  // des chiffres d'usage perimes depuis la connexion.
+  async rafraichirAgence(): Promise<void> {
+    try {
+      const res: any = await firstValueFrom(this.http.get(`${environment.apiUrl}/me`));
+      const courant = this._user();
+      if (courant && res?.agence !== undefined) {
+        const maj = { ...courant, agence: res.agence };
+        this._user.set(maj);
+        localStorage.setItem('user', JSON.stringify(maj));
+      }
+    } catch {
+      // silencieux : le bandeau garde les dernieres donnees connues
+    }
   }
 
   logout(): void {

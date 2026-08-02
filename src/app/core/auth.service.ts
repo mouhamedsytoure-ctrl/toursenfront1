@@ -77,6 +77,20 @@ export class AuthService {
     this.setSession(res);
   }
 
+  async demanderReinitialisation(email: string): Promise<string> {
+    const res: any = await firstValueFrom(
+      this.http.post(`${environment.apiUrl}/mot-de-passe/oublie`, { email })
+    );
+    return res.message;
+  }
+
+  async reinitialiserMotDePasse(data: { token: string; email: string; password: string; password_confirmation: string }): Promise<string> {
+    const res: any = await firstValueFrom(
+      this.http.post(`${environment.apiUrl}/mot-de-passe/reinitialiser`, data)
+    );
+    return res.message;
+  }
+
   // Recharge le bloc agence (quota, nb utilisateurs, jours restants) depuis /me.
   // A appeler quand on entre dans l'espace de gestion, pour ne pas afficher
   // des chiffres d'usage perimes depuis la connexion.

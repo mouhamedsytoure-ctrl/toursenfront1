@@ -8,6 +8,8 @@ export const routes: Routes = [
 
   { path: 'login',       loadComponent: () => import('./pages/login/login').then(m => m.Login) },
   { path: 'inscription', loadComponent: () => import('./pages/inscription/inscription').then(m => m.Inscription) },
+  { path: 'mot-de-passe-oublie',     loadComponent: () => import('./pages/mot-de-passe-oublie/mot-de-passe-oublie').then(m => m.MotDePasseOublie) },
+  { path: 'reinitialiser-mot-de-passe', loadComponent: () => import('./pages/reinitialiser-mot-de-passe/reinitialiser-mot-de-passe').then(m => m.ReinitialiserMotDePasse) },
 
   // Ecran de reabonnement (essai termine ou compte suspendu)
   { path: 'abonnement',  loadComponent: () => import('./pages/abonnement/abonnement').then(m => m.Abonnement) },

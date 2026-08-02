@@ -1,45 +1,91 @@
-<div class="login-wrap">
-  <div class="login-card">
-    <p class="sub">Creer votre espace agence</p>
+<div class="insc-wrap">
+  <div class="insc-shell">
+    <aside class="insc-brand">
+      <a class="marque" routerLink="/accueil">Sunnu Immo</a>
+      <h2>Votre agence, en ligne en quelques minutes</h2>
+      <p>Contrats, loyers, quittances et vitrine en ligne : tout est pret des la creation de votre espace.</p>
 
-    <label>Nom de l'agence</label>
-    <input class="input" [(ngModel)]="agenceNom" (ngModelChange)="onNomChange()" placeholder="Mon Agence Immo"/>
+      <div class="brand-icones">
+        <div class="bi">
+          <div class="ic-wrap">
+            <div class="ic-book"><span class="spine"></span><span class="page p1"></span><span class="page p2"></span></div>
+          </div>
+          <span>Contrats</span>
+        </div>
+        <div class="bi">
+          <div class="ic-wrap">
+            <div class="ic-house"><span class="roof"></span><span class="wall"><span class="window"></span><span class="door"></span></span></div>
+          </div>
+          <span>Vitrine</span>
+        </div>
+        <div class="bi">
+          <div class="ic-wrap">
+            <div class="ic-chart"><span class="bar b1"></span><span class="bar b2"></span><span class="bar b3"></span><span class="bar b4"></span></div>
+          </div>
+          <span>Statistiques</span>
+        </div>
+      </div>
 
-    <label>Identifiant (slug)</label>
-    <input class="input" [(ngModel)]="agenceSlug" (ngModelChange)="onSlugChange()" placeholder="mon-agence-immo"/>
+      <ul class="check-liste">
+        <li>14 jours d'essai gratuit</li>
+        <li>Aucune carte bancaire requise</li>
+        <li>Activation immediate</li>
+      </ul>
+    </aside>
 
-    <label>Telephone de l'agence</label>
-    <input class="input" [(ngModel)]="agenceTelephone" placeholder="77 000 00 00"/>
+    <div class="insc-form">
+      <p class="sub">Creer votre espace agence</p>
 
-    <label>Ville</label>
-    <input class="input" [(ngModel)]="agenceVille" placeholder="Dakar"/>
+      <div class="etape">
+        <span class="etape-ic">🏢</span>
+        <div class="etape-txt"><strong>Votre agence</strong><small>Nom, identifiant, coordonnees</small></div>
+      </div>
 
-    <hr/>
+      <label><span class="li">🏢</span>Nom de votre espace</label>
+      <input class="input" [(ngModel)]="agenceNom" (ngModelChange)="onNomChange()" placeholder="Mon Agence Immo"/>
+      <p class="aide">Exemple : "Immeuble Sada Timera" ou "Agence SITS"</p>
 
-    <label>Votre nom</label>
-    <input class="input" [(ngModel)]="adminNom" placeholder="Prenom Nom"/>
+      <label><span class="li">🔗</span>Identifiant (slug)</label>
+      <input class="input" [(ngModel)]="agenceSlug" (ngModelChange)="onSlugChange()" placeholder="mon-agence-immo"/>
 
-    <label>Votre email</label>
-    <input class="input" type="email" [(ngModel)]="adminEmail" placeholder="email@exemple.com" autocomplete="email"/>
+      <label><span class="li">📞</span>Telephone de l'agence</label>
+      <input class="input" [(ngModel)]="agenceTelephone" placeholder="77 000 00 00"/>
 
-    <label>Votre telephone</label>
-    <input class="input" [(ngModel)]="adminTelephone" placeholder="77 000 00 00"/>
+      <label><span class="li">📍</span>Ville</label>
+      <input class="input" [(ngModel)]="agenceVille" placeholder="Dakar"/>
 
-    <label>Mot de passe</label>
-    <div class="pwd-wrap">
-      <input class="input pwd-input" [type]="showPwd ? 'text' : 'password'" [(ngModel)]="adminPassword"
-             (keyup.enter)="submit()" placeholder="8 caracteres minimum" autocomplete="new-password"/>
-      <button type="button" class="eye-btn" (click)="showPwd=!showPwd" tabindex="-1">
-        {{ showPwd ? '🙈' : '👁' }}
+      <hr/>
+
+      <div class="etape">
+        <span class="etape-ic">👤</span>
+        <div class="etape-txt"><strong>Votre compte</strong><small>Vous serez l'administrateur</small></div>
+      </div>
+
+      <label><span class="li">👤</span>Votre nom</label>
+      <input class="input" [(ngModel)]="adminNom" placeholder="Prenom Nom"/>
+
+      <label><span class="li">✉️</span>Votre email</label>
+      <input class="input" type="email" [(ngModel)]="adminEmail" placeholder="email@exemple.com" autocomplete="email"/>
+
+      <label><span class="li">📱</span>Votre telephone</label>
+      <input class="input" [(ngModel)]="adminTelephone" placeholder="77 000 00 00"/>
+
+      <label><span class="li">🔒</span>Mot de passe</label>
+      <div class="pwd-wrap">
+        <input class="input pwd-input" [type]="showPwd ? 'text' : 'password'" [(ngModel)]="adminPassword"
+               (keyup.enter)="submit()" placeholder="8 caracteres minimum" autocomplete="new-password"/>
+        <button type="button" class="eye-btn" (click)="showPwd=!showPwd" tabindex="-1">
+          {{ showPwd ? '🙈' : '👁' }}
+        </button>
+      </div>
+
+      @if (error()) { <div class="err">{{ error() }}</div> }
+
+      <button class="btn btn-ink full" [disabled]="loading()" (click)="submit()">
+        {{ loading() ? 'Creation...' : 'Creer mon agence' }}
       </button>
+
+      <a class="vitrine-lien" routerLink="/login">Deja un compte ? Se connecter →</a>
     </div>
-
-    @if (error()) { <div class="err">{{ error() }}</div> }
-
-    <button class="btn btn-ink full" [disabled]="loading()" (click)="submit()">
-      {{ loading() ? 'Creation...' : 'Creer mon agence' }}
-    </button>
-
-    <a class="vitrine-lien" routerLink="/login">Deja un compte ? Se connecter →</a>
   </div>
 </div>

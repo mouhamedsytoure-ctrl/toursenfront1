@@ -22,6 +22,11 @@ import { AuthService } from '../../core/auth.service';
         @for (im of items(); track im.id) {
           <a class="imcard" [routerLink]="['/app/immeubles', im.id]">
             @if (cover(im); as c) { <img [src]="c" alt=""/> } @else { <div class="noimg">🏢</div> }
+            <button type="button" class="avant" [class.actif]="im.mis_en_avant" [class.verrou]="!estVip()"
+                    [title]="estVip() ? (im.mis_en_avant ? 'Retirer la mise en avant' : 'Mettre en avant sur la vitrine') : 'Fonctionnalite VIP'"
+                    (click)="toggleAvant($event, im)">
+              {{ im.mis_en_avant ? '⭐' : '☆' }}
+            </button>
             <div class="ov">
               <div class="nm">{{ im.nom }}</div>
               <div class="vl">{{ im.ville }}</div>
@@ -58,6 +63,12 @@ import { AuthService } from '../../core/auth.service';
     .imcard img{width:100%;height:100%;object-fit:cover}
     .noimg{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;color:#fff;background:var(--ink)}
     .ov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:14px;background:linear-gradient(to bottom,transparent,rgba(0,0,0,.75))}
+    .avant{position:absolute;top:10px;right:10px;z-index:2;width:32px;height:32px;border-radius:50%;border:none;
+           background:rgba(0,0,0,.45);color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+           backdrop-filter:blur(3px);transition:background .15s}
+    .avant:hover{background:rgba(0,0,0,.65)}
+    .avant.actif{background:var(--gold);color:var(--ink)}
+    .avant.verrou{opacity:.55}
     .nm{color:#fff;font-weight:bold;font-size:17px} .vl{color:#cfe0d9;font-size:13px}
     .bg{position:fixed;inset:0;background:rgba(13,28,25,.5);display:flex;align-items:center;justify-content:center;padding:18px;z-index:60}
     .modal{background:#fff;border-radius:16px;max-width:440px;width:100%;padding:18px}
@@ -81,6 +92,24 @@ export class Immeubles implements OnInit {
 
   constructor(private api: Api, private auth: AuthService, private router: Router) {}
   admin() { const r = this.auth.role(); return r === 'admin' || r === 'super_admin'; }
+  estVip() { return this.auth.agence()?.plan === 'illimite' || !!this.auth.user()?.is_platform_admin; }
+
+  async toggleAvant(ev: Event, im: any) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    // Reserve au plan VIP : pas de navigation vers /abonnement ici, cette page
+    // suppose un acces bloque et afficherait un message trompeur pour un compte
+    // actif juste pas VIP. Le cadenas + l'infobulle suffisent a expliquer pourquoi.
+    if (!this.estVip()) return;
+
+    const nouveau = !im.mis_en_avant;
+    im.mis_en_avant = nouveau; // optimiste
+    try {
+      await this.api.put('/immeubles/' + im.id, { mis_en_avant: nouveau });
+    } catch {
+      im.mis_en_avant = !nouveau; // echec : on annule
+    }
+  }
 
   async ngOnInit() { await this.charger(); }
   async charger() {

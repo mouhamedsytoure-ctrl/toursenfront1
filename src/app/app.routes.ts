@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { adminGuard, locataireGuard } from './core/role.guard';
+import { adminGuard, locataireGuard, superAdminGuard } from './core/role.guard';
 import { plateformeGuard } from './core/plateforme.guard';
 
 export const routes: Routes = [
@@ -43,9 +43,9 @@ export const routes: Routes = [
       { path: 'contrats/:id',     loadComponent: () => import('./pages/contrats/contrat-detail').then(m => m.ContratDetail) },
       { path: 'loyers',           loadComponent: () => import('./pages/loyers/loyers').then(m => m.Loyers) },
       { path: 'reclamations',     loadComponent: () => import('./pages/reclamations/reclamations').then(m => m.Reclamations) },
-      { path: 'utilisateurs',     loadComponent: () => import('./pages/utilisateurs/utilisateurs').then(m => m.Utilisateurs) },
+      { path: 'utilisateurs',     canActivate: [superAdminGuard], loadComponent: () => import('./pages/utilisateurs/utilisateurs').then(m => m.Utilisateurs) },
       { path: 'statistiques',     loadComponent: () => import('./pages/statistiques/statistiques').then(m => m.Statistiques) },
-      { path: 'parametres',       loadComponent: () => import('./pages/parametres/parametres').then(m => m.Parametres) },
+      { path: 'parametres',       canActivate: [superAdminGuard], loadComponent: () => import('./pages/parametres/parametres').then(m => m.Parametres) },
     ],
   },
 

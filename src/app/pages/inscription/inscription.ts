@@ -24,6 +24,7 @@ export class Inscription {
   agenceSlug = '';
   slugModifieManuellement = false;
   agenceTelephone = '';
+  agenceWhatsapp = '';
   agenceVille = '';
   adminNom = '';
   adminEmail = '';
@@ -70,6 +71,7 @@ export class Inscription {
         agence_nom: this.agenceNom.trim(),
         agence_slug: this.agenceSlug.trim(),
         agence_telephone: this.agenceTelephone.trim() || undefined,
+        agence_whatsapp: this.agenceWhatsapp.trim() || undefined,
         agence_ville: this.agenceVille.trim() || undefined,
         plan_souhaite: this.planSouhaite || undefined,
         admin_nom: this.adminNom.trim(),

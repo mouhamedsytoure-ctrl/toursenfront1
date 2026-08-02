@@ -1,18 +1,31 @@
 import { Routes } from '@angular/router';
 import { adminGuard, locataireGuard } from './core/role.guard';
+import { plateformeGuard } from './core/plateforme.guard';
 
 export const routes: Routes = [
+  // Page produit (racine du site)
+  { path: 'accueil',     loadComponent: () => import('./pages/accueil/accueil').then(m => m.Accueil) },
+
   { path: 'login',       loadComponent: () => import('./pages/login/login').then(m => m.Login) },
   { path: 'inscription', loadComponent: () => import('./pages/inscription/inscription').then(m => m.Inscription) },
 
+  // Ecran de reabonnement (essai termine ou compte suspendu)
+  { path: 'abonnement',  loadComponent: () => import('./pages/abonnement/abonnement').then(m => m.Abonnement) },
+
   // Vitrine publique (visiteurs, sans connexion), une par agence (slug dans l'URL)
-  
   { path: 'vitrine/:slug',      loadComponent: () => import('./pages/vitrine/vitrine').then(m => m.Vitrine) },
   { path: 'vitrine/:slug/:id',  loadComponent: () => import('./pages/vitrine/vitrine-detail').then(m => m.VitrineDetail) },
   { path: 'apropos',     loadComponent: () => import('./pages/apropos/apropos').then(m => m.Apropos) },
 
   // Espace locataire (responsive : ordinateur ET telephone, iPhone inclus)
   { path: 'espace', canActivate: [locataireGuard], loadComponent: () => import('./pages/espace/espace').then(m => m.Espace) },
+
+  // Console du proprietaire de la plateforme
+  {
+    path: 'plateforme',
+    canActivate: [plateformeGuard],
+    loadComponent: () => import('./pages/plateforme/plateforme').then(m => m.Plateforme),
+  },
 
   // Espace de gestion (admin / super admin uniquement)
   {
@@ -31,9 +44,11 @@ export const routes: Routes = [
       { path: 'loyers',           loadComponent: () => import('./pages/loyers/loyers').then(m => m.Loyers) },
       { path: 'reclamations',     loadComponent: () => import('./pages/reclamations/reclamations').then(m => m.Reclamations) },
       { path: 'utilisateurs',     loadComponent: () => import('./pages/utilisateurs/utilisateurs').then(m => m.Utilisateurs) },
+      { path: 'statistiques',     loadComponent: () => import('./pages/statistiques/statistiques').then(m => m.Statistiques) },
+      { path: 'parametres',       loadComponent: () => import('./pages/parametres/parametres').then(m => m.Parametres) },
     ],
   },
 
-  { path: '', pathMatch: 'full', redirectTo: 'vitrine/sits' },
-{ path: '**', redirectTo: 'vitrine/sits' },
+  { path: '', pathMatch: 'full', redirectTo: 'accueil' },
+  { path: '**', redirectTo: 'accueil' },
 ];

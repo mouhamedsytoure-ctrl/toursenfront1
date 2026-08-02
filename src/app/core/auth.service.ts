@@ -8,6 +8,8 @@ export interface AppAgence {
   slug: string;
   logo: string | null;
   telephone: string | null;
+  whatsapp: string | null;
+  adresse: string | null;
   ville: string | null;
   plan: string;
   plan_souhaite: string | null;
@@ -65,7 +67,7 @@ export class AuthService {
   }
 
   async register(data: {
-    agence_nom: string; agence_slug: string; agence_telephone?: string; agence_ville?: string;
+    agence_nom: string; agence_slug: string; agence_telephone?: string; agence_whatsapp?: string; agence_ville?: string;
     plan_souhaite?: string;
     admin_nom: string; admin_email: string; admin_password: string; admin_telephone?: string;
   }): Promise<void> {

@@ -1,6 +1,5 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { environment } from '../../../environments/environment';
 import { Api } from '../../core/api.service';
 
 @Component({
@@ -71,8 +70,8 @@ import { Api } from '../../core/api.service';
                     <span class="voir">Voir les détails →</span>
                   </div>
                   <div class="card-phones" (click)="$event.stopPropagation()">
-                    <a class="phone-link" href="tel:+221775660377">📞 77 566 03 77</a>
-                    <a class="phone-link" href="tel:+221777353772">📞 77 735 37 72</a>
+                    @if (telHref(); as t) { <a class="phone-link" [href]="t">📞 Appeler</a> }
+                    @if (waHref(); as w) { <a class="phone-link" [href]="w" target="_blank" rel="noopener">💬 WhatsApp</a> }
                   </div>
                 </div>
               </a>
@@ -120,12 +119,11 @@ import { Api } from '../../core/api.service';
         </div>
         <div>
           <p class="ftitle">Contact</p>
-          <p>📍 Rue 13x12 Médina, Dakar</p>
-          <p>📞 77 566 03 77 / 77 735 37 72</p>
-          <p>✉️ toursen.immo&#64;gmail.com</p>
+          @if (agence()?.telephone) { <p>📞 {{ agence()?.telephone }}</p> }
+          @if (agence()?.whatsapp) { <p>💬 {{ agence()?.whatsapp }}</p> }
         </div>
       </div>
-      <p class="fcopy">© 2025 Toursen Immobilier. Tous droits réservés.</p>
+      <p class="fcopy">© {{ annee }} {{ agenceNom() }}. Tous droits réservés.</p>
     </footer>
   `,
   styles: [`
@@ -138,8 +136,8 @@ import { Api } from '../../core/api.service';
       background:rgba(10,28,22,.96); backdrop-filter:blur(14px);
       padding:13px 24px; box-shadow:0 1px 0 rgba(255,255,255,.06);
     }
-    .brand { background:#fff; border-radius:8px; padding:5px 10px; display:block; }
-    .brand img { height:28px; display:block; }
+    .brand { display:block; }
+    .brand img { height:46px; display:block; border-radius:8px; }
     .nav-btn {
       background:var(--gold); color:var(--ink); font-weight:700; font-size:13px;
       padding:9px 18px; border-radius:10px; text-decoration:none;
@@ -315,7 +313,7 @@ import { Api } from '../../core/api.service';
     /* FOOTER */
     .footer { background:#060f0c; color:#4d7a68; padding:48px 20px 24px; }
     .footer-grid { max-width:1160px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:40px; padding-bottom:32px; border-bottom:1px solid rgba(255,255,255,.07); margin-bottom:20px; }
-    .flogo { height:34px; filter:brightness(0) invert(1); opacity:.65; display:block; margin-bottom:12px; }
+    .flogo { height:64px; display:block; margin-bottom:12px; border-radius:10px; box-shadow:0 0 0 1px rgba(255,255,255,.08); }
     .fdesc { font-size:13px; line-height:1.6; }
     .ftitle { color:#fff; font-weight:700; margin:0 0 12px; }
     .footer-grid p { font-size:13px; margin:0 0 8px; }
@@ -332,15 +330,29 @@ import { Api } from '../../core/api.service';
 })
 export class Vitrine implements OnInit {
   items = signal<any[]>([]);
-  agence = signal<{ nom: string; logo: string | null; telephone: string | null } | null>(null);
+  agence = signal<{ nom: string; logo: string | null; telephone: string | null; whatsapp: string | null } | null>(null);
   loading = signal(true);
   error = signal<string | null>(null);
   contactOpen: number | null = null;
   slug = '';
+  annee = new Date().getFullYear();
 
-  // Logo de l'agence si defini, sinon logo Toursen par defaut
-  logo = () => this.agence()?.logo || (environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg');
-  agenceNom = () => this.agence()?.nom || 'Toursen';
+  // Logo de l'agence si defini, sinon logo Sunnu Immo par defaut
+  logo = () => this.agence()?.logo || '/logo-sunnu-immo.jpeg';
+  agenceNom = () => this.agence()?.nom || 'Sunnu Immo';
+
+  // Numeros propres a l'agence affichee (jamais ceux d'une autre agence).
+  telHref(): string | null {
+    const t = this.agence()?.telephone;
+    return t ? 'tel:+221' + this.chiffres(t) : null;
+  }
+  waHref(): string | null {
+    const w = this.agence()?.whatsapp || this.agence()?.telephone;
+    return w ? 'https://wa.me/221' + this.chiffres(w) : null;
+  }
+  private chiffres(v: string): string {
+    return v.replace(/\D/g, '').replace(/^221/, '');
+  }
 
   toggleContact(id: number) { this.contactOpen = this.contactOpen === id ? null : id; }
 

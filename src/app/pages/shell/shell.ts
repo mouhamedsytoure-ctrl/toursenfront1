@@ -29,6 +29,7 @@ export class Shell implements OnInit {
     { label: 'Réclamations',    path: '/app/reclamations', icon: '🛠' },
     { label: 'Utilisateurs',    path: '/app/utilisateurs', icon: '🔑', superAdminOnly: true },
     { label: 'Statistiques',    path: '/app/statistiques', icon: '📈', proOnly: true },
+    { label: 'Parametres',      path: '/app/parametres',   icon: '⚙️', superAdminOnly: true },
   ];
 
   constructor(public auth: AuthService, private router: Router) {}

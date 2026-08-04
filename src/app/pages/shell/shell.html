@@ -1,7 +1,7 @@
 <div class="layout">
   <!-- Sidebar -->
   <aside class="sidebar" [class.open]="open()">
-    <a class="brandbox" routerLink="/apropos" title="A propos">
+    <a class="brandbox" routerLink="/accueil" title="Accueil">
       @if (logo(); as l) {
         <img [src]="l" alt="{{ agenceNom() }}"/>
       } @else {

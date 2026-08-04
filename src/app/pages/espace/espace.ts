@@ -295,6 +295,6 @@ export class Espace implements OnInit {
     } finally { this.busy.set(false); }
   }
 
-  apropos() { window.location.href = '/apropos'; }
+  apropos() { window.location.href = '/accueil'; }
   logout() { this.auth.logout(); window.location.href = '/accueil'; }
 }

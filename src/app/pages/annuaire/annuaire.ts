@@ -19,10 +19,9 @@ import { Api, fcfa } from '../../core/api.service';
     </header>
 
     <div class="filtres">
-      <input class="fi" type="text" [(ngModel)]="ville" placeholder="Ville / zone (ex: Dakar)" (keyup.enter)="rechercher()"/>
-      <input class="fi num" type="number" min="0" [(ngModel)]="prixMin" placeholder="Prix min" (keyup.enter)="rechercher()"/>
-      <input class="fi num" type="number" min="0" [(ngModel)]="prixMax" placeholder="Prix max" (keyup.enter)="rechercher()"/>
-      <button class="btn-gold" (click)="rechercher()">Filtrer</button>
+      <input class="fi" type="text" [(ngModel)]="ville" (ngModelChange)="rechercherDebounce()" placeholder="Ville / zone (ex: Dakar)"/>
+      <input class="fi num" type="number" min="0" [(ngModel)]="prixMin" (ngModelChange)="rechercherDebounce()" placeholder="Prix min"/>
+      <input class="fi num" type="number" min="0" [(ngModel)]="prixMax" (ngModelChange)="rechercherDebounce()" placeholder="Prix max"/>
       @if (ville || prixMin || prixMax) {
         <button class="btn-ghost" (click)="reinitialiser()">Réinitialiser</button>
       }
@@ -108,9 +107,18 @@ export class Annuaire implements OnInit {
   prixMin: number | null = null;
   prixMax: number | null = null;
 
+  private debounceId: ReturnType<typeof setTimeout> | null = null;
+
   constructor(private api: Api) {}
 
   async ngOnInit() { await this.rechercher(); }
+
+  // Recherche automatique en temps reel, avec un court delai pour ne pas
+  // envoyer une requete a chaque frappe de clavier.
+  rechercherDebounce() {
+    if (this.debounceId) clearTimeout(this.debounceId);
+    this.debounceId = setTimeout(() => this.rechercher(), 400);
+  }
 
   async rechercher() {
     this.loading.set(true);

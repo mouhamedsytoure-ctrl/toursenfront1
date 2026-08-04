@@ -9,7 +9,7 @@ import { Api } from '../../core/api.service';
   template: `
     <!-- NAV -->
     <nav class="nav">
-      <a class="brand" routerLink="/apropos"><img [src]="logo()" alt="{{ agenceNom() }}"/></a>
+      <a class="brand" [routerLink]="['/vitrine', slug]"><img [src]="logo()" alt="{{ agenceNom() }}"/></a>
       <a class="nav-btn" routerLink="/login">Mon espace →</a>
     </nav>
 

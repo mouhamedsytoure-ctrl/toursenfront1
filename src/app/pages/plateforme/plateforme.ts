@@ -410,6 +410,6 @@ export class Plateforme implements OnInit {
 
   deconnexion() {
     this.auth.logout();
-    this.router.navigateByUrl('/login');
+    this.router.navigateByUrl('/accueil');
   }
 }

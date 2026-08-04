@@ -54,13 +54,17 @@ import { RouterLink } from '@angular/router';
 
   <div class="ac">
     <nav class="nav">
-      <span class="marque">Sunnu Immo</span>
+      <span class="marque">
+        <span class="marque-logo"><img src="/logo-sunnu-immo.jpeg" alt="Sunnu Immo"/></span>
+        Sunnu Immo
+      </span>
       <div class="nav-l">
         <a href="#fonctionnalites" (click)="allerA('fonctionnalites', $event)">Fonctionnalites</a>
         <a href="#histoire" (click)="allerA('histoire', $event)">Notre histoire</a>
         <a href="#formules" (click)="allerA('formules', $event)">Tarifs</a>
+        <a routerLink="/annuaire">Voir les logements</a>
         <a routerLink="/login">Connexion</a>
-        <a class="btn plein" routerLink="/inscription">Essai gratuit</a>
+        <a class="btn plein cta-pulse" routerLink="/inscription">Essai gratuit</a>
       </div>
     </nav>
 
@@ -107,7 +111,7 @@ import { RouterLink } from '@angular/router';
     <section class="histoire reveal" id="histoire">
       <div class="histoire-photo">
         @if (photoOk) {
-          <img src="/photo-fondateur.jpg" alt="Mouhamed Sy Toure, fondateur de Sunnu Immo" (error)="photoOk = false">
+          <img src="/photo-fondateur.jpeg" alt="Mouhamed Sy Toure, fondateur de Sunnu Immo" (error)="photoOk = false">
         } @else {
           <div class="avatar-secours">MST</div>
         }
@@ -166,7 +170,17 @@ import { RouterLink } from '@angular/router';
   styles: [`
     .ac { background:#faf9f6; min-height:100vh; }
     .nav { display:flex; justify-content:space-between; align-items:center; padding:18px 32px; max-width:1140px; margin:0 auto; }
-    .marque { font-size:20px; font-weight:700; color:#12291f; }
+    .marque { display:flex; align-items:center; gap:10px; font-size:20px; font-weight:700; color:#12291f; }
+    .marque-logo { position:relative; width:38px; height:38px; border-radius:9px; overflow:hidden; flex:0 0 auto;
+                    box-shadow:0 2px 8px rgba(18,41,31,.18); }
+    .marque-logo img { width:100%; height:100%; object-fit:cover; display:block; }
+    .marque-logo::after {
+      content:''; position:absolute; top:0; left:-150%; width:55%; height:100%;
+      background:linear-gradient(120deg, transparent, rgba(255,255,255,.65), transparent);
+      transform:skewX(-20deg); animation:marqueShine 4.5s ease-in-out infinite;
+    }
+    @keyframes marqueShine { 0%,15% { left:-150%; } 55%,100% { left:150%; } }
+    @media (prefers-reduced-motion: reduce) { .marque-logo::after { animation:none; } }
     .nav-l { display:flex; gap:16px; align-items:center; }
     .nav-l a { text-decoration:none; color:#374151; font-size:14px; }
 
@@ -182,6 +196,13 @@ import { RouterLink } from '@angular/router';
            background:#fff; text-decoration:none; color:#111; font-size:14px; cursor:pointer; }
     .btn.plein { background:#12291f; color:#e9c46a; border-color:#12291f; }
     .btn.grand { padding:14px 28px; font-size:15px; }
+
+    .cta-pulse { animation:ctaPulse 1.8s ease-in-out infinite; }
+    @keyframes ctaPulse {
+      0%, 100% { box-shadow:0 0 0 0 rgba(18,41,31,.5); }
+      50% { box-shadow:0 0 0 9px rgba(18,41,31,0); }
+    }
+    @media (prefers-reduced-motion: reduce) { .cta-pulse { animation:none; } }
 
     /* --- bandeau d'icones visible des l'arrivee, sans avoir a descendre --- */
     .mini-icones { display:flex; flex-wrap:wrap; justify-content:center; gap:30px;
@@ -279,8 +300,8 @@ import { RouterLink } from '@angular/router';
 
     /* --- notre histoire --- */
     .histoire { max-width:980px; margin:0 auto; padding:60px 24px 76px; display:flex; gap:48px; align-items:center; }
-    .histoire-photo { flex:0 0 220px; }
-    .histoire-photo img, .avatar-secours { width:220px; height:220px; border-radius:24px; object-fit:cover; display:block; }
+    .histoire-photo { flex:0 0 180px; }
+    .histoire-photo img, .avatar-secours { width:180px; height:180px; border-radius:24px; object-fit:cover; display:block; }
     .avatar-secours { display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#12291f,#2f5943);
                        color:#e9c46a; font-size:46px; font-weight:700; }
     .histoire-texte .eyebrow { color:#c9922f; font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.07em; }
@@ -317,6 +338,8 @@ import { RouterLink } from '@angular/router';
       .mini { width:80px; }
       .feature-row, .feature-row.reverse { flex-direction:column; text-align:center; gap:24px; }
       .histoire { flex-direction:column; text-align:center; }
+      .histoire-photo { flex-basis:auto; }
+      .histoire-photo img, .avatar-secours { width:140px; height:140px; margin:0 auto; }
     }
   `],
 })

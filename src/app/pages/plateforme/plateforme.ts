@@ -125,6 +125,26 @@ type Stats = {
       }
     }
 
+    <div class="filtres">
+      <input class="fi-nom" type="text" [ngModel]="rechercheNom()" (ngModelChange)="rechercheNom.set($event)" placeholder="Rechercher une agence par nom..."/>
+      <select [ngModel]="filtrePlan()" (ngModelChange)="filtrePlan.set($event)">
+        <option value="">Toutes les formules</option>
+        <option value="essai">Essai</option>
+        <option value="starter">Standard</option>
+        <option value="pro">Pro</option>
+        <option value="illimite">VIP</option>
+      </select>
+      <select [ngModel]="filtreStatut()" (ngModelChange)="filtreStatut.set($event)">
+        <option value="">Tous statuts</option>
+        <option value="actif">Actives</option>
+        <option value="bloque">Bloquées (suspendu/expiré)</option>
+      </select>
+      @if (rechercheNom() || filtrePlan() || filtreStatut()) {
+        <button class="mini" (click)="reinitialiserFiltres()">Réinitialiser</button>
+      }
+      <span class="fi-compte">{{ agencesFiltrees().length }} / {{ agences().length }} agence(s)</span>
+    </div>
+
     <div class="carte">
       <table class="tbl">
         <thead>
@@ -134,7 +154,7 @@ type Stats = {
           </tr>
         </thead>
         <tbody>
-          @for (a of agences(); track a.id) {
+          @for (a of agencesFiltrees(); track a.id) {
             <tr>
               <td>
                 <strong>{{ a.nom }}</strong>
@@ -252,6 +272,9 @@ type Stats = {
     .muted { color:#9ca3af; text-align:center; padding:22px; }
     .err { color:#b91c1c; background:#fee2e2; padding:10px 14px; border-radius:8px; }
 
+    .filtres { display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+    .fi-nom { flex:1; min-width:220px; padding:9px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:14px; }
+    .fi-compte { margin-left:auto; color:#9ca3af; font-size:12.5px; white-space:nowrap; }
     .comp-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:24px; }
     .comp-card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; }
     .comp-lab { font-size:12.5px; color:#6b7280; }
@@ -280,6 +303,30 @@ export class Plateforme implements OnInit {
   suspensionEnCours = signal<number | null>(null);
   motifChoisi: 'paiement' | 'autre' = 'paiement';
   noteChoisie = '';
+
+  rechercheNom = signal('');
+  filtrePlan = signal('');
+  filtreStatut = signal('');
+
+  agencesFiltrees = computed(() => {
+    const nom = this.rechercheNom().trim().toLowerCase();
+    const plan = this.filtrePlan();
+    const statut = this.filtreStatut();
+
+    return this.agences().filter(a => {
+      if (nom && !a.nom.toLowerCase().includes(nom)) return false;
+      if (plan && a.plan !== plan) return false;
+      if (statut === 'actif' && !a.active) return false;
+      if (statut === 'bloque' && a.active) return false;
+      return true;
+    });
+  });
+
+  reinitialiserFiltres() {
+    this.rechercheNom.set('');
+    this.filtrePlan.set('');
+    this.filtreStatut.set('');
+  }
 
   constructor(private api: Api, private auth: AuthService, private router: Router) {}
 

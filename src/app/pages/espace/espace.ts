@@ -13,7 +13,7 @@ import { AuthService } from '../../core/auth.service';
   imports: [FormsModule, SlicePipe],
   template: `
     <header class="top">
-      <a class="brandbox" (click)="apropos()"><img [src]="logo" alt="SITS"/></a>
+      <a class="brandbox" (click)="apropos()"><img [src]="logo" alt="Sunnu Immo"/></a>
       <div class="me">{{ auth.user()?.name }} <button class="lo" (click)="logout()">Déconnexion</button></div>
     </header>
 
@@ -149,7 +149,7 @@ import { AuthService } from '../../core/auth.service';
   styles: [`
     :host{display:block;min-height:100vh;background:var(--bg)}
     .top{display:flex;justify-content:space-between;align-items:center;background:var(--ink);color:#fff;padding:12px 18px}
-    .brandbox{background:#fff;border-radius:8px;padding:5px 10px;cursor:pointer}.brandbox img{height:26px;display:block}
+    .brandbox{display:block;cursor:pointer}.brandbox img{height:44px;display:block;border-radius:8px}
     .me{font-size:14px;display:flex;align-items:center;gap:12px}
     .lo{background:none;border:1px solid #ffffff55;color:#fff;border-radius:8px;padding:5px 10px;cursor:pointer}
     .tabs{display:flex;gap:6px;overflow:auto;background:var(--ink);padding:0 12px 12px}
@@ -188,7 +188,7 @@ import { AuthService } from '../../core/auth.service';
   `],
 })
 export class Espace implements OnInit {
-  logo = environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg';
+  logo = '/logo-sunnu-immo.jpeg';
   tab = signal<'accueil' | 'contrat' | 'paiements' | 'reclam'>('accueil');
   loading = signal(true);
   busy = signal(false);
@@ -296,5 +296,5 @@ export class Espace implements OnInit {
   }
 
   apropos() { window.location.href = '/apropos'; }
-  logout() { this.auth.logout(); window.location.href = '/login'; }
+  logout() { this.auth.logout(); window.location.href = '/accueil'; }
 }

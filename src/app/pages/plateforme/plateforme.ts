@@ -13,9 +13,18 @@ type AgenceLigne = {
   essai_termine_le: string | null; jours_restants: number | null; inscrite_le: string;
 };
 
+type MoisEvolution = { periode: string; libelle: string; nb_agences: number; revenus: number };
+
 type Stats = {
   nb_agences: number; nb_actives: number; nb_en_essai: number; nb_payantes: number;
   nb_suspendues: number; nb_expirees: number; mrr: number; essais_bientot: number;
+  evolution: MoisEvolution[];
+  comparaison: {
+    agences_ce_mois: number; agences_mois_dernier: number; variation_agences: number | null;
+    revenus_ce_mois: number; revenus_mois_dernier: number; variation_revenus: number | null;
+  };
+  total_annee_courante: number;
+  total_encaisse_historique: number;
 };
 
 @Component({
@@ -51,6 +60,69 @@ type Stats = {
           <span class="k-val">{{ s.nb_suspendues + s.nb_expirees }}</span><span class="k-lab">Bloquées</span>
         </div>
       </div>
+
+      <div class="comp-row">
+        <div class="comp-card">
+          <span class="comp-lab">Nouvelles agences ce mois</span>
+          <div class="comp-val">
+            {{ s.comparaison.agences_ce_mois }}
+            @if (s.comparaison.variation_agences !== null) {
+              <span class="comp-var" [class.up]="s.comparaison.variation_agences >= 0" [class.down]="s.comparaison.variation_agences < 0">
+                {{ s.comparaison.variation_agences >= 0 ? '▲' : '▼' }} {{ abs(s.comparaison.variation_agences) }}%
+              </span>
+            }
+          </div>
+          <span class="comp-sub">vs {{ s.comparaison.agences_mois_dernier }} le mois dernier</span>
+        </div>
+        <div class="comp-card">
+          <span class="comp-lab">Revenus encaissés ce mois</span>
+          <div class="comp-val">
+            {{ money(s.comparaison.revenus_ce_mois) }}
+            @if (s.comparaison.variation_revenus !== null) {
+              <span class="comp-var" [class.up]="s.comparaison.variation_revenus >= 0" [class.down]="s.comparaison.variation_revenus < 0">
+                {{ s.comparaison.variation_revenus >= 0 ? '▲' : '▼' }} {{ abs(s.comparaison.variation_revenus) }}%
+              </span>
+            }
+          </div>
+          <span class="comp-sub">vs {{ money(s.comparaison.revenus_mois_dernier) }} le mois dernier</span>
+        </div>
+        <div class="comp-card">
+          <span class="comp-lab">Encaissé cette année</span>
+          <div class="comp-val">{{ money(s.total_annee_courante) }}</div>
+          <span class="comp-sub">Historique total : {{ money(s.total_encaisse_historique) }}</span>
+        </div>
+      </div>
+
+      <div class="carte evo-carte">
+        <h2>Nouvelles agences — 12 derniers mois</h2>
+        @if (s.total_encaisse_historique === 0) {
+          <p class="note-vide">Aucun paiement automatique n'est encore passé (PayDunya) : les revenus resteront à 0 tant qu'aucune facture n'a été réellement payée.</p>
+        }
+        <div class="barres">
+          @for (m of s.evolution; track m.periode) {
+            <div class="barre">
+              <div class="b-tube"><div class="b-fill" [style.height.%]="pct(m.nb_agences, maxAgences(s.evolution))"></div></div>
+              <span class="b-val">{{ m.nb_agences }}</span>
+              <span class="b-lab">{{ m.libelle }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      @if (s.total_encaisse_historique > 0) {
+        <div class="carte evo-carte">
+          <h2>Revenus encaissés — 12 derniers mois</h2>
+          <div class="barres">
+            @for (m of s.evolution; track m.periode) {
+              <div class="barre">
+                <div class="b-tube"><div class="b-fill or" [style.height.%]="pct(m.revenus, maxRevenus(s.evolution))"></div></div>
+                <span class="b-val">{{ court(m.revenus) }}</span>
+                <span class="b-lab">{{ m.libelle }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
     }
 
     <div class="carte">
@@ -179,6 +251,24 @@ type Stats = {
     .btn { padding:9px 16px; border:1px solid #d1d5db; background:#fff; border-radius:10px; cursor:pointer; }
     .muted { color:#9ca3af; text-align:center; padding:22px; }
     .err { color:#b91c1c; background:#fee2e2; padding:10px 14px; border-radius:8px; }
+
+    .comp-row { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:24px; }
+    .comp-card { background:#fff; border:1px solid #e5e7eb; border-radius:12px; padding:16px; }
+    .comp-lab { font-size:12.5px; color:#6b7280; }
+    .comp-val { font-size:22px; font-weight:700; margin:4px 0 2px; display:flex; align-items:baseline; gap:8px; }
+    .comp-var { font-size:12px; font-weight:600; }
+    .comp-var.up { color:#16a34a; } .comp-var.down { color:#dc2626; }
+    .comp-sub { font-size:12px; color:#9ca3af; }
+
+    .evo-carte { padding:20px; margin-bottom:18px; }
+    .evo-carte h2 { margin:0 0 6px; font-size:15px; }
+    .note-vide { color:#9ca3af; font-size:12.5px; margin:0 0 14px; }
+    .barres { display:flex; gap:8px; align-items:flex-end; overflow-x:auto; padding-top:8px; }
+    .barre { flex:1; min-width:44px; display:flex; flex-direction:column; align-items:center; gap:5px; }
+    .b-tube { width:100%; height:110px; background:#f3f4f6; border-radius:6px; display:flex; align-items:flex-end; overflow:hidden; }
+    .b-fill { width:100%; background:#12291f; border-radius:6px 6px 0 0; transition:height .4s; min-height:2px; }
+    .b-fill.or { background:#c9922f; }
+    .b-val { font-size:11px; font-weight:600; } .b-lab { font-size:10px; color:#9ca3af; }
   `],
 })
 export class Plateforme implements OnInit {
@@ -194,6 +284,22 @@ export class Plateforme implements OnInit {
   constructor(private api: Api, private auth: AuthService, private router: Router) {}
 
   money = (v: number) => fcfa(v);
+  abs = (v: number) => Math.abs(v);
+
+  maxAgences(evolution: MoisEvolution[]): number {
+    return Math.max(...evolution.map(m => m.nb_agences), 1);
+  }
+  maxRevenus(evolution: MoisEvolution[]): number {
+    return Math.max(...evolution.map(m => m.revenus), 1);
+  }
+  pct(valeur: number, max: number): number {
+    return Math.round((valeur / max) * 100);
+  }
+  court(v: number): string {
+    if (v >= 1_000_000) return (v / 1_000_000).toFixed(1).replace('.0', '') + 'M';
+    if (v >= 1000) return Math.round(v / 1000) + 'k';
+    return String(v);
+  }
 
   async ngOnInit() { await this.charger(); }
 

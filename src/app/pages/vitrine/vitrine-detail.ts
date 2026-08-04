@@ -1,6 +1,5 @@
 import { Component, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { environment } from '../../../environments/environment';
 import { Api, fcfa } from '../../core/api.service';
 
 @Component({
@@ -10,7 +9,7 @@ import { Api, fcfa } from '../../core/api.service';
   template: `
     <header class="top">
       <a [routerLink]="['/vitrine', slug]" class="back">←</a>
-      <a class="brandbox" routerLink="/apropos"><img [src]="logo()" alt="{{ agenceNom() }}"/></a>
+      <a class="brandbox" [routerLink]="['/vitrine', slug]"><img [src]="logo()" alt="{{ agenceNom() }}"/></a>
       <a class="lien" routerLink="/login">Connexion</a>
     </header>
 
@@ -78,7 +77,7 @@ import { Api, fcfa } from '../../core/api.service';
     /* --- header --- */
     .top{position:relative;z-index:10;display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.35);backdrop-filter:blur(6px);color:#fff;padding:12px 18px}
     .back{color:#fff;text-decoration:none;font-size:22px} .lien{color:var(--gold);text-decoration:none;font-weight:600}
-    .brandbox{background:#fff;border-radius:8px;padding:5px 10px}.brandbox img{height:24px;display:block}
+    .brandbox{display:block}.brandbox img{height:40px;display:block;border-radius:8px}
     /* --- titre immeuble --- */
     .hero-title{position:relative;z-index:10;padding:32px 18px 20px;text-align:center}
     .hero-title h1{color:#fff;font-size:28px;margin:0 0 4px;text-shadow:0 2px 8px rgba(0,0,0,.6)}
@@ -111,8 +110,8 @@ import { Api, fcfa } from '../../core/api.service';
 })
 export class VitrineDetail implements OnInit {
   agence = signal<{ nom: string; logo: string | null; telephone: string | null } | null>(null);
-  logo = () => this.agence()?.logo || (environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg');
-  agenceNom = () => this.agence()?.nom || 'Toursen';
+  logo = () => this.agence()?.logo || '/logo-sunnu-immo.jpeg';
+  agenceNom = () => this.agence()?.nom || 'Sunnu Immo';
   im = signal<any>(null);
   loading = signal(true);
   error = signal<string | null>(null);

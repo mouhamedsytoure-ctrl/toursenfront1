@@ -111,7 +111,12 @@ export class Immeubles implements OnInit {
     }
   }
 
-  async ngOnInit() { await this.charger(); }
+  async ngOnInit() {
+    // Le plan de l'agence stocke localement peut etre perime (change depuis
+    // la console plateforme ou un paiement, sans que cette page ne le sache).
+    await this.auth.rafraichirAgence();
+    await this.charger();
+  }
   async charger() {
     this.loading.set(true);
     try { this.items.set(await this.api.get('/immeubles')); this.error.set(null); }

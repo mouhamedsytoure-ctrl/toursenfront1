@@ -14,6 +14,9 @@ export const routes: Routes = [
   // Ecran de reabonnement (essai termine ou compte suspendu)
   { path: 'abonnement',  loadComponent: () => import('./pages/abonnement/abonnement').then(m => m.Abonnement) },
 
+  // Annuaire global : tous les logements de toutes les agences actives, filtrable.
+  { path: 'annuaire', loadComponent: () => import('./pages/annuaire/annuaire').then(m => m.Annuaire) },
+
   // Vitrine publique (visiteurs, sans connexion), une par agence (slug dans l'URL)
   { path: 'vitrine/:slug',      loadComponent: () => import('./pages/vitrine/vitrine').then(m => m.Vitrine) },
   { path: 'vitrine/:slug/:id',  loadComponent: () => import('./pages/vitrine/vitrine-detail').then(m => m.VitrineDetail) },

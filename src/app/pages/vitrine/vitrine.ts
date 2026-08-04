@@ -59,6 +59,7 @@ import { Api } from '../../core/api.service';
                     <div class="noimg">🏢</div>
                   }
                   <div class="card-overlay"></div>
+                  @if (im.mis_en_avant) { <span class="vedette">✨ En vedette</span> }
                   <span class="cbadge" [class.dispo]="(im.disponibles_count||0)>0" [class.full]="(im.disponibles_count||0)===0">
                     {{ (im.disponibles_count||0) > 0 ? (im.disponibles_count) + ' logement(s) dispo' : 'Complet' }}
                   </span>
@@ -269,6 +270,12 @@ import { Api } from '../../core/api.service';
     }
     .cbadge.dispo { background:var(--gold); color:var(--ink); }
     .cbadge.full { background:rgba(0,0,0,.55); color:#fff; backdrop-filter:blur(4px); }
+    .vedette {
+      position:absolute; top:14px; left:14px; font-size:11px; font-weight:700;
+      padding:5px 12px; border-radius:99px; letter-spacing:.2px;
+      background:linear-gradient(90deg, var(--gold), #f0d080); color:var(--ink);
+      box-shadow:0 2px 10px rgba(198,163,96,.5);
+    }
     .card-body { padding:20px 22px 22px; flex:1; display:flex; flex-direction:column; }
     .card-body h3 { color:var(--ink); font-size:19px; font-weight:700; margin:0 0 6px; }
     .cloc { color:var(--muted); font-size:13px; margin:0 0 16px; flex:1; }

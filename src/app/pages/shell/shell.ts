@@ -12,10 +12,9 @@ interface MenuItem { label: string; path: string; icon: string; superAdminOnly?:
   styleUrl: './shell.scss',
 })
 export class Shell implements OnInit {
-  // Pas de repli sur le logo Toursen ici : une nouvelle agence sans logo
-  // ne doit pas voir la marque d'une autre agence. Le template affiche
-  // un pictogramme generique si logo() est null.
-  logo = () => this.auth.agence()?.logo ?? null;
+  // Repli sur le logo Sunnu Immo (marque de la plateforme, pas d'une
+  // agence en particulier) tant que l'agence n'a pas mis en ligne le sien.
+  logo = () => this.auth.agence()?.logo || '/logo-sunnu-immo.jpeg';
   agenceNom = () => this.auth.agence()?.nom || 'Sunnu Immo';
   open = signal(false); // menu mobile
 

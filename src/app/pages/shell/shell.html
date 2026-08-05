@@ -2,11 +2,7 @@
   <!-- Sidebar -->
   <aside class="sidebar" [class.open]="open()">
     <a class="brandbox" routerLink="/apropos" title="À propos">
-      @if (logo(); as l) {
-        <img [src]="l" alt="{{ agenceNom() }}"/>
-      } @else {
-        <span class="brand-pictogram">🏢</span>
-      }
+      <img [src]="logo()" alt="{{ agenceNom() }}"/>
     </a>
     <nav>
       @for (m of visibleMenu(); track m.path) {

@@ -2,6 +2,7 @@ import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Api, fcfa } from '../../core/api.service';
@@ -10,10 +11,10 @@ import { AuthService } from '../../core/auth.service';
 @Component({
   selector: 'app-espace',
   standalone: true,
-  imports: [FormsModule, SlicePipe],
+  imports: [FormsModule, SlicePipe, RouterLink],
   template: `
     <header class="top">
-      <a class="brandbox" (click)="apropos()"><img [src]="logo" alt="Sunnu Immo"/></a>
+      <a class="brandbox" routerLink="/apropos"><img [src]="logo" alt="Sunnu Immo"/></a>
       <div class="me">{{ auth.user()?.name }} <button class="lo" (click)="logout()">Déconnexion</button></div>
     </header>
 
@@ -295,6 +296,5 @@ export class Espace implements OnInit {
     } finally { this.busy.set(false); }
   }
 
-  apropos() { window.location.href = '/accueil'; }
   logout() { this.auth.logout(); window.location.href = '/accueil'; }
 }

@@ -10,7 +10,7 @@ import { AuthService } from '../../core/auth.service';
   template: `
   <div class="login-wrap">
     <div class="login-card">
-      <a class="logobox" routerLink="/accueil"><img src="/logo-sunnu-immo.jpeg" alt="Sunnu Immo"/></a>
+      <a class="logobox" routerLink="/apropos"><img src="/logo-sunnu-immo.jpeg" alt="Sunnu Immo"/></a>
       <p class="sub">Nouveau mot de passe</p>
 
       @if (!token || !email) {

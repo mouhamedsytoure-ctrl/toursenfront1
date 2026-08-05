@@ -10,7 +10,7 @@ import { AuthService } from '../../core/auth.service';
   template: `
   <div class="login-wrap">
     <div class="login-card">
-      <a class="logobox" routerLink="/accueil"><img src="/logo-sunnu-immo.jpeg" alt="Sunnu Immo"/></a>
+      <a class="logobox" routerLink="/apropos"><img src="/logo-sunnu-immo.jpeg" alt="Sunnu Immo"/></a>
       <p class="sub">Mot de passe oublie</p>
 
       @if (!envoye()) {
@@ -66,7 +66,10 @@ export class MotDePasseOublie {
       this.message.set(await this.auth.demanderReinitialisation(this.email.trim()));
       this.envoye.set(true);
     } catch (e: any) {
-      this.erreur.set(e?.error?.message || 'Envoi impossible. Reessayez.');
+      // On n'affiche jamais le message brut du serveur ici : il peut contenir
+      // des details internes (prestataire d'email, adresses, etc.) qui ne
+      // regardent pas l'utilisateur.
+      this.erreur.set("Impossible d'envoyer l'email pour le moment. Reessayez plus tard.");
     } finally {
       this.loading.set(false);
     }

@@ -9,7 +9,7 @@ import { Api, fcfa } from '../../core/api.service';
   template: `
     <header class="top">
       <a [routerLink]="['/vitrine', slug]" class="back">←</a>
-      <a class="brandbox" [routerLink]="['/vitrine', slug]"><img [src]="logo()" alt="{{ agenceNom() }}"/></a>
+      <a class="brandbox" routerLink="/accueil" fragment="histoire"><img [src]="logo()" alt="{{ agenceNom() }}"/></a>
       <a class="lien" routerLink="/login">Connexion</a>
     </header>
 

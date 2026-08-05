@@ -37,8 +37,8 @@ nav a.active { background: var(--gold); color: var(--ink); font-weight: 600; }
   .page { padding: 16px; }
 }
 
-.brandbox{background:#fff;border-radius:10px;padding:8px;margin-bottom:18px;text-align:center;}
-.brandbox img{max-width:100%;height:auto;max-height:38px;}
+.brandbox{display:block;border-radius:10px;overflow:hidden;margin-bottom:18px;}
+.brandbox img{width:100%;height:auto;display:block;}
 
 .badge-pro{
   margin-left:auto; background:var(--gold); color:var(--ink); font-size:10px; font-weight:700;

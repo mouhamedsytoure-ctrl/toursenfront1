@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, OnDestroy, inject } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-accueil',
@@ -345,7 +345,6 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 })
 export class Accueil implements AfterViewInit, OnDestroy {
   private el = inject(ElementRef<HTMLElement>);
-  private route = inject(ActivatedRoute);
   private observer?: IntersectionObserver;
 
   photoOk = true;
@@ -386,15 +385,6 @@ export class Accueil implements AfterViewInit, OnDestroy {
       }
     }, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
     items.forEach((item) => this.observer!.observe(item));
-
-    // Arrivee depuis une autre page avec #histoire (ex: logo d'une vitrine
-    // d'agence) : le defilement de fragment natif d'Angular n'est pas fiable
-    // avec des composants charges en lazy, on le fait nous-memes.
-    const fragment = this.route.snapshot.fragment;
-    if (fragment) {
-      const cible = root.querySelector('#' + fragment);
-      cible?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
   }
 
   ngOnDestroy() {

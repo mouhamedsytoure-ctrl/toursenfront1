@@ -2,6 +2,7 @@ import { Component, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SlicePipe } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Api, fcfa } from '../../core/api.service';
@@ -109,11 +110,14 @@ import { AuthService } from '../../core/auth.service';
             <h3>Mes paiements</h3>
             @if (paiements().length===0) { <p class="muted">Aucun paiement.</p> }
             @for (p of paiements(); track p.id) {
-              <div class="row pay">
-                <div><b>{{ p.periode }}</b><div class="muted">{{ p.mode_paiement }} · {{ p.statut }}</div></div>
-                <div class="r">
-                  <b>{{ fcfa(p.montant) }} FCFA</b>
-                  @if (p.statut==='paye') { <button class="lien" [disabled]="busy()" (click)="quittance(p.id)">Reçu</button> }
+              <div class="payblock" [class.cible]="p.id === recuCible()">
+                @if (p.id === recuCible()) { <div class="badge-mail">📩 Le reçu de cet email</div> }
+                <div class="row pay">
+                  <div><b>{{ p.periode }}</b><div class="muted">{{ p.mode_paiement }} · {{ p.statut }}</div></div>
+                  <div class="r">
+                    <b>{{ fcfa(p.montant) }} FCFA</b>
+                    @if (p.statut==='paye') { <button class="lien" [disabled]="busy()" (click)="quittance(p.id)">Reçu</button> }
+                  </div>
                 </div>
               </div>
             }
@@ -173,6 +177,8 @@ import { AuthService } from '../../core/auth.service';
     .ok{background:#E7F1EC;color:var(--ok);padding:12px;border-radius:12px;margin-top:12px}
     .badge{background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:12px;color:var(--ink)}
     textarea.input{resize:vertical}
+    .payblock.cible{background:#FFF8E9;border:1px solid var(--gold);border-radius:12px;padding:0 10px;margin:0 -10px}
+    .badge-mail{color:var(--gold);font-size:12px;font-weight:700;padding-top:8px}
 
     .hero-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
     .statut-pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
@@ -204,10 +210,22 @@ export class Espace implements OnInit {
 
   rObjet = ''; rDesc = ''; rPrio = 'normale';
   fcfa = fcfa;
+  recuCible = signal<number | null>(null);
 
-  constructor(private api: Api, private http: HttpClient, public auth: AuthService) {}
+  constructor(private api: Api, private http: HttpClient, public auth: AuthService, private route: ActivatedRoute) {}
 
-  async ngOnInit() { await this.charger(); await this.chargerReclams(); }
+  async ngOnInit() {
+    // Lien profond depuis l'email "votre reçu est disponible" : ?tab=paiements&paiement=123
+    const qp = this.route.snapshot.queryParamMap;
+    const paiementId = qp.get('paiement');
+    if (paiementId) {
+      this.recuCible.set(Number(paiementId));
+      this.tab.set('paiements');
+    } else if (qp.get('tab') === 'paiements') {
+      this.tab.set('paiements');
+    }
+    await this.charger(); await this.chargerReclams();
+  }
 
   contrat() { return this._contrat(); }
   paiements() { return this._paiements(); }

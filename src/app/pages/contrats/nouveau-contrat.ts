@@ -46,8 +46,9 @@ import { Api } from '../../core/api.service';
       <input class="input" [class.inp-err]="submitted&&!f.preneur_prenom" placeholder="Prénom" [(ngModel)]="f.preneur_prenom"/>
       <label class="flabel">Téléphone <span class="req">*</span></label>
       <input class="input" [class.inp-err]="submitted&&!f.preneur_telephone" placeholder="77 000 00 00" [(ngModel)]="f.preneur_telephone"/>
-      <label class="flabel">Email <span class="req">*</span></label>
+      <label class="flabel">Email de contact <span class="req">*</span></label>
       <input class="input" [class.inp-err]="submitted&&!f.preneur_email" placeholder="email@exemple.com" [(ngModel)]="f.preneur_email"/>
+      <p class="hint">C'est ici que le locataire recevra ses messages (bienvenue, reçus...). Son identifiant de connexion à l'application sera généré automatiquement.</p>
       <label class="flabel">Adresse <span class="req">*</span></label>
       <input class="input" [class.inp-err]="submitted&&!f.preneur_adresse" placeholder="Adresse actuelle" [(ngModel)]="f.preneur_adresse"/>
       <label class="flabel">Profession <span class="req">*</span></label>
@@ -110,11 +111,18 @@ import { Api } from '../../core/api.service';
     </div>
 
     @if (error()) { <div class="err">{{ error() }}</div> }
-    @if (motDePasse()) { <div class="ok">Compte créé. Mot de passe à communiquer : <b>{{ motDePasse() }}</b></div> }
-
-    <button class="btn btn-ink full" [disabled]="saving()" (click)="save()">
-      {{ saving() ? 'Création...' : 'Créer le contrat' }}
-    </button>
+    @if (emailConnexion()) {
+      <div class="ok">
+        Compte créé. Un email de bienvenue a été envoyé à {{ f.preneur_email }}.<br/>
+        Identifiant de connexion : <b>{{ emailConnexion() }}</b><br/>
+        @if (motDePasse()) { Mot de passe : <b>{{ motDePasse() }}</b> }
+      </div>
+      <button class="btn btn-ink full" (click)="continuer()">Continuer</button>
+    } @else {
+      <button class="btn btn-ink full" [disabled]="saving()" (click)="save()">
+        {{ saving() ? 'Création...' : 'Créer le contrat' }}
+      </button>
+    }
     <p class="note">Une fois créé, le contrat est figé (non modifiable).</p>
   `,
   styles: [`
@@ -128,6 +136,7 @@ import { Api } from '../../core/api.service';
     .err{color:var(--bad);margin:10px 0}
     .ok{color:var(--ok);margin:10px 0;background:#E7F1EC;padding:10px;border-radius:10px}
     .note{color:var(--muted);font-size:12px;text-align:center;margin-top:8px}
+    .hint{color:var(--muted);font-size:12px;margin:-6px 0 10px}
     .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
     .flabel{display:block;font-size:12px;color:var(--muted);font-weight:600;margin:8px 0 4px}
     .req{color:var(--bad)}
@@ -143,6 +152,8 @@ export class NouveauContrat implements OnInit {
   saving = signal(false);
   error = signal<string | null>(null);
   motDePasse = signal<string | null>(null);
+  emailConnexion = signal<string | null>(null);
+  contratCreeId: number | null = null;
   submitted = false;
 
   dnJour = ''; dnMois = ''; dnAnnee = '';
@@ -209,10 +220,16 @@ export class NouveauContrat implements OnInit {
       const body = { ...this.f, logement_id: this.chambre.id };
       Object.keys(body).forEach(k => { if (body[k] === '' || body[k] === null) delete body[k]; });
       const res: any = await this.api.post('/contrats', body);
+      this.contratCreeId = res.contrat.id;
       if (res?.mot_de_passe) { this.motDePasse.set(res.mot_de_passe); }
-      setTimeout(() => this.router.navigate(['/app/contrats', res.contrat.id]), res?.mot_de_passe ? 2500 : 0);
+      this.emailConnexion.set(res?.email_connexion || null);
+      if (!res?.email_connexion) { this.router.navigate(['/app/contrats', res.contrat.id]); }
     } catch (e: any) {
       this.error.set(e?.error?.message || e?.error?.errors?.preneur_email?.[0] || 'Erreur lors de la création.');
     } finally { this.saving.set(false); }
+  }
+
+  continuer() {
+    if (this.contratCreeId) { this.router.navigate(['/app/contrats', this.contratCreeId]); }
   }
 }

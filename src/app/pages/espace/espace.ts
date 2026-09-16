@@ -54,8 +54,18 @@ import { AuthService } from '../../core/auth.service';
 
           @if (!paye()) {
             <div class="info-paiement">
-              Réglez votre loyer directement auprès de l'agence (espèces, Wave, Orange Money).
-              Votre paiement sera confirmé ici et votre reçu vous sera envoyé par email dès sa réception.
+              Réglez votre loyer en espèces directement auprès de l'agence. Votre paiement sera
+              confirmé ici et votre reçu vous sera envoyé par email dès sa réception.
+            </div>
+            <div class="modes">
+              <button class="mode" disabled>
+                Wave
+                <span class="soon">Bientôt disponible</span>
+              </button>
+              <button class="mode" disabled>
+                Orange Money
+                <span class="soon">Bientôt disponible</span>
+              </button>
             </div>
           }
           @if (msg()) { <div class="ok">{{ msg() }}</div> }
@@ -171,6 +181,9 @@ import { AuthService } from '../../core/auth.service';
     .row .r{display:flex;align-items:center;gap:10px}
     .lien{background:none;border:none;color:var(--gold);font-weight:600;cursor:pointer;margin-top:10px}
     .info-paiement{background:#FBF3E6;color:var(--ink);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:13.5px;line-height:1.5}
+    .modes{display:flex;gap:10px;margin-top:10px}
+    .mode{flex:1;padding:14px;border:2px solid var(--line);background:#f5f5f5;border-radius:12px;font-weight:700;color:var(--muted);cursor:not-allowed;display:flex;flex-direction:column;align-items:center;gap:4px}
+    .mode .soon{font-size:11px;font-weight:600;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:99px;padding:2px 8px}
     .ok{background:#E7F1EC;color:var(--ok);padding:12px;border-radius:12px;margin-top:12px}
     .badge{background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:12px;color:var(--ink)}
     textarea.input{resize:vertical}

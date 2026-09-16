@@ -2,7 +2,6 @@ import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../core/auth.service';
-import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -12,7 +11,7 @@ import { environment } from '../../../environments/environment';
   styleUrl: './login.scss',
 })
 export class Login {
-  logo = environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg';
+  logo = '/logo-sunnu-immo.jpeg';
   email = '';
   password = '';
   showPwd = false;
@@ -26,6 +25,13 @@ export class Login {
     this.loading.set(true);
     try {
       await this.auth.login(this.email.trim(), this.password);
+
+      // Le proprietaire de la plateforme va sur sa console, pas dans une agence.
+      if (this.auth.user()?.is_platform_admin) {
+        this.router.navigate(['/plateforme']);
+        return;
+      }
+
       const role = this.auth.role();
       if (role === 'super_admin' || role === 'admin') {
         this.router.navigate(['/app']);

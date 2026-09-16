@@ -53,18 +53,10 @@ import { AuthService } from '../../core/auth.service';
           </div>
 
           @if (!paye()) {
-            @if (!choixPaye()) {
-              <button class="btn btn-gold full" (click)="choixPaye.set(true)">Payer mon loyer</button>
-            } @else {
-              <div class="card">
-                <p class="pp">Choisir le moyen de paiement :</p>
-                <div class="modes">
-                  <button class="mode" [disabled]="busy()" (click)="payer('wave')">Wave</button>
-                  <button class="mode" [disabled]="busy()" (click)="payer('orange_money')">Orange Money</button>
-                </div>
-                <button class="lien" (click)="choixPaye.set(false)">Annuler</button>
-              </div>
-            }
+            <div class="info-paiement">
+              Réglez votre loyer directement auprès de l'agence (espèces, Wave, Orange Money).
+              Votre paiement sera confirmé ici et votre reçu vous sera envoyé par email dès sa réception.
+            </div>
           }
           @if (msg()) { <div class="ok">{{ msg() }}</div> }
 
@@ -177,9 +169,8 @@ import { AuthService } from '../../core/auth.service';
     .row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
     .row:first-of-type{border-top:none}.row span{color:var(--muted)}.row b{color:var(--ink)}
     .row .r{display:flex;align-items:center;gap:10px}
-    .pp{color:var(--ink);font-weight:600}
-    .modes{display:flex;gap:10px}.mode{flex:1;padding:14px;border:2px solid var(--gold);background:#fff;border-radius:12px;font-weight:700;color:var(--ink);cursor:pointer}
     .lien{background:none;border:none;color:var(--gold);font-weight:600;cursor:pointer;margin-top:10px}
+    .info-paiement{background:#FBF3E6;color:var(--ink);border-radius:12px;padding:12px 14px;margin-top:12px;font-size:13.5px;line-height:1.5}
     .ok{background:#E7F1EC;color:var(--ok);padding:12px;border-radius:12px;margin-top:12px}
     .badge{background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:12px;color:var(--ink)}
     textarea.input{resize:vertical}
@@ -205,7 +196,6 @@ export class Espace implements OnInit {
   tab = signal<'accueil' | 'contrat' | 'paiements' | 'reclam'>('accueil');
   loading = signal(true);
   busy = signal(false);
-  choixPaye = signal(false);
   msg = signal<string | null>(null);
   msgErr = signal(false);
 
@@ -279,17 +269,6 @@ export class Espace implements OnInit {
     return new Date().getDate() > j;
   }
 
-  async payer(mode: string) {
-    this.busy.set(true); this.msg.set(null);
-    try {
-      await this.api.post('/locataire/payer', { mode_paiement: mode });
-      this.choixPaye.set(false);
-      this.msg.set('Paiement effectué ✓');
-      await this.charger();
-    } catch (e: any) {
-      this.msg.set(e?.error?.message || 'Paiement impossible.');
-    } finally { this.busy.set(false); }
-  }
 
   async pdfContrat() {
     this.busy.set(true);

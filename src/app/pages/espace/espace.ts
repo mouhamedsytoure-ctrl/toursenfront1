@@ -41,6 +41,12 @@ import { AuthService } from '../../core/auth.service';
             <div class="statut">{{ paye() ? '✓ Loyer du mois payé' : echeanceTxt() }}</div>
           </div>
 
+          @if (!paye() && enRetard()) {
+            <div class="alerte-retard">
+              ⚠️ {{ auth.user()?.name }}, vous n'avez pas encore payé votre loyer de ce mois-ci. Merci de régulariser rapidement.
+            </div>
+          }
+
           <div class="grid2">
             <div class="card kpi"><div class="k-ic">📅</div><div><div class="k-v">{{ moisRestants() }}</div><div class="k-l">Fin du bail</div><div class="k-s">reste {{ joursRestants() }} j</div></div></div>
             <div class="card kpi"><div class="k-ic">🐖</div><div><div class="k-v">{{ fcfa(totalPaye()) }}</div><div class="k-l">Total payé</div><div class="k-s">FCFA cumulés</div></div></div>
@@ -179,6 +185,7 @@ import { AuthService } from '../../core/auth.service';
     textarea.input{resize:vertical}
     .payblock.cible{background:#FFF8E9;border:1px solid var(--gold);border-radius:12px;padding:0 10px;margin:0 -10px}
     .badge-mail{color:var(--gold);font-size:12px;font-weight:700;padding-top:8px}
+    .alerte-retard{background:#FBE3E0;color:var(--bad);border-radius:12px;padding:12px 14px;margin-top:12px;font-weight:600;font-size:13.5px;line-height:1.4}
 
     .hero-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
     .statut-pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:99px}
@@ -266,6 +273,10 @@ export class Espace implements OnInit {
     const now = new Date(); const d = now.getDate();
     const reste = d <= j ? (j - d) : 0;
     return reste > 0 ? `Il vous reste ${reste} jour(s) pour payer` : 'Loyer à payer';
+  }
+  enRetard(): boolean {
+    const j = this._contrat()?.jour_echeance || 5;
+    return new Date().getDate() > j;
   }
 
   async payer(mode: string) {

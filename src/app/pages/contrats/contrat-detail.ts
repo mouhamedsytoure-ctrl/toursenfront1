@@ -1,15 +1,17 @@
 import { SlicePipe } from '@angular/common';
 import { Component, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Api, fcfa } from '../../core/api.service';
+import { AuthService } from '../../core/auth.service';
 
 @Component({
   selector: 'app-contrat-detail',
   standalone: true,
-  imports: [RouterLink, SlicePipe],
+  imports: [RouterLink, SlicePipe, FormsModule],
   template: `
     <a routerLink="/app/contrats" class="back">← Contrats</a>
     @if (loading()) { <p class="muted">Chargement...</p> }
@@ -24,7 +26,8 @@ import { Api, fcfa } from '../../core/api.service';
       <div class="card grid2">
         <div><span>Logement</span><b>{{ logement(ct) }}</b></div>
         <div><span>Téléphone</span><b>{{ ct.preneur_telephone || '—' }}</b></div>
-        <div><span>Email</span><b>{{ ct.preneur_email || '—' }}</b></div>
+        <div><span>Email de contact</span><b>{{ ct.preneur_email || '—' }}</b></div>
+        <div><span>Identifiant de connexion</span><b>{{ ct.locataire?.email || '—' }}</b></div>
         <div><span>Adresse</span><b>{{ ct.preneur_adresse || '—' }}</b></div>
         <div><span>Profession</span><b>{{ ct.preneur_profession || '—' }}</b></div>
         <div><span>Nationalité</span><b>{{ ct.preneur_nationalite || '—' }}</b></div>
@@ -47,6 +50,32 @@ import { Api, fcfa } from '../../core/api.service';
           @if (ct.statut !== 'resilie') { <button class="btn ghost" (click)="action('resilier','Résilier ce contrat ?')">Résilier</button> }
           @if (!ct.est_bloque) { <button class="btn ghost" (click)="action('bloquer','Bloquer ce contrat ?')">Bloquer</button> }
           <button class="btn ghost" (click)="action('archiver','Archiver ce contrat ?')">Archiver</button>
+        </div>
+      }
+
+      @if (estSuperAdmin()) {
+        <h3>Accès du locataire</h3>
+        <div class="card">
+          <p class="muted">
+            En cas de problème de connexion (identifiant oublié, email de contact erroné), vous seul
+            pouvez réinitialiser l'accès. Un nouveau mot de passe sera envoyé au vrai email de contact.
+          </p>
+          @if (!reinitOuvert()) {
+            <button class="btn ghost" (click)="reinitOuvert.set(true)">Réinitialiser l'accès</button>
+          } @else {
+            <label class="flabel">Corriger l'email de contact (optionnel, laisser vide pour ne pas changer)</label>
+            <input class="input" placeholder="nouveau@email.com" [(ngModel)]="nouvelEmailContact" />
+            <div class="actions">
+              <button class="btn btn-gold" [disabled]="reinitBusy()" (click)="reinitialiser()">Confirmer la réinitialisation</button>
+              <button class="btn ghost" (click)="reinitOuvert.set(false)">Annuler</button>
+            </div>
+          }
+          @if (reinitResultat(); as r) {
+            <div class="ok">
+              Nouveaux identifiants envoyés à {{ r.email_contact }}.<br/>
+              Identifiant : <b>{{ r.email_connexion }}</b> — Mot de passe : <b>{{ r.mot_de_passe }}</b>
+            </div>
+          }
         </div>
       }
 
@@ -74,6 +103,8 @@ import { Api, fcfa } from '../../core/api.service';
     .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
     .sheet{background:#fff;border-radius:14px;max-width:760px;width:100%;max-height:85vh;overflow:auto;padding:20px}
     pre{white-space:pre-wrap;font-family:inherit;font-size:13.5px;line-height:1.55;color:var(--ink);margin:0}
+    .flabel{display:block;font-size:12px;color:var(--muted);font-weight:600;margin:8px 0 4px}
+    .ok{color:var(--ok);margin:10px 0;background:#E7F1EC;padding:10px;border-radius:10px;font-size:13.5px}
   `],
 })
 export class ContratDetail implements OnInit {
@@ -81,8 +112,28 @@ export class ContratDetail implements OnInit {
   texte = signal<string | null>(null);
   loading = signal(true);
   fcfa = fcfa;
-  constructor(private api: Api, private route: ActivatedRoute, private http: HttpClient) {}
+
+  reinitOuvert = signal(false);
+  reinitBusy = signal(false);
+  reinitResultat = signal<any>(null);
+  nouvelEmailContact = '';
+
+  constructor(private api: Api, private route: ActivatedRoute, private http: HttpClient, private auth: AuthService) {}
   async ngOnInit() { await this.load(); }
+  estSuperAdmin() { return this.auth.role() === 'super_admin'; }
+  async reinitialiser() {
+    this.reinitBusy.set(true);
+    try {
+      const body = this.nouvelEmailContact.trim() ? { nouvel_email_contact: this.nouvelEmailContact.trim() } : {};
+      const res = await this.api.post('/contrats/' + this.c().id + '/reinitialiser-acces', body);
+      this.reinitResultat.set(res);
+      this.reinitOuvert.set(false);
+      this.nouvelEmailContact = '';
+      await this.load();
+    } catch (e: any) {
+      alert(e?.error?.message || "Impossible de réinitialiser l'accès.");
+    } finally { this.reinitBusy.set(false); }
+  }
   async load() {
     const id = this.route.snapshot.paramMap.get('id');
     this.loading.set(true);

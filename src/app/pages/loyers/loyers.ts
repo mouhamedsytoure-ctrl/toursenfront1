@@ -10,6 +10,7 @@ import { Api, fcfa } from '../../core/api.service';
     <h1 class="ptitle">Loyers — {{ periode }}</h1>
     @if (loading()) { <p class="muted">Chargement...</p> }
     @else {
+      <input class="input search" placeholder="Rechercher un locataire..." [(ngModel)]="q" />
       <div class="chips">
         <button [class.on]="filtre()==='tous'" (click)="filtre.set('tous')">Tous</button>
         <button [class.on]="filtre()==='impayes'" (click)="filtre.set('impayes')">Non payés</button>
@@ -24,6 +25,8 @@ import { Api, fcfa } from '../../core/api.service';
             </span>
           </div>
 
+          @if (r.annuleMotif) { <div class="annule">↺ Dernier paiement annulé : « {{ r.annuleMotif }} »</div> }
+
           @if (!r.paye && r.contratId) {
             @if (formOuvert() === r.id) {
               <div class="mini">
@@ -34,21 +37,31 @@ import { Api, fcfa } from '../../core/api.service';
                   <option value="orange_money">Orange Money</option>
                 </select>
                 <div class="mini-actions">
-                  <button class="btn btn-gold" [disabled]="busy()" (click)="enregistrer(r)">Confirmer le paiement</button>
+                  <button class="btn btn-gold" [disabled]="busy()" (click)="confirmer(r)">Confirmer le paiement</button>
                   <button class="lien" (click)="formOuvert.set(null)">Annuler</button>
                 </div>
               </div>
             } @else {
-              <button class="btn btn-ink small" (click)="ouvrirForm(r)">Enregistrer le paiement</button>
+              <button class="btn btn-ink small" (click)="ouvrirForm(r)">Confirmer le paiement</button>
             }
           }
 
           @if (r.paye && r.paiementId) {
-            @if (r.recuEnvoye) {
-              <div class="envoye">✓ Reçu envoyé{{ r.recuEnvoyeLabel ? ' le ' + r.recuEnvoyeLabel : '' }}</div>
-            } @else {
-              <button class="btn btn-ink small" [disabled]="busy()" (click)="envoyerRecu(r)">Envoyer le reçu par email</button>
-            }
+            <div class="apres">
+              <span class="envoye">{{ r.recuEnvoye ? '✓ Reçu envoyé par email' : '⚠ Reçu non envoyé (pas d\\'email de contact)' }}</span>
+              @if (r.recuEnvoye) { <button class="lien" [disabled]="busy()" (click)="renvoyerRecu(r)">Renvoyer</button> }
+              @if (annulationOuverte() === r.id) {
+                <div class="mini">
+                  <textarea class="input" rows="2" placeholder="Motif de l'annulation (obligatoire)" [(ngModel)]="motifAnnulation"></textarea>
+                  <div class="mini-actions">
+                    <button class="btn btn-ink" [disabled]="busy()" (click)="confirmerAnnulation(r)">Confirmer l'annulation</button>
+                    <button class="lien" (click)="annulationOuverte.set(null)">Fermer</button>
+                  </div>
+                </div>
+              } @else {
+                <button class="lien danger" (click)="ouvrirAnnulation(r)">Annuler ce paiement</button>
+              }
+            </div>
           }
 
           @if (erreur() === r.id) { <div class="err">{{ erreurMsg() }}</div> }
@@ -60,6 +73,7 @@ import { Api, fcfa } from '../../core/api.service';
   styles: [`
     .ptitle{color:var(--ink);margin:0 0 14px}
     .muted{color:var(--muted)}
+    .search{margin-bottom:12px;max-width:420px}
     .chips{display:flex;gap:8px;margin-bottom:14px}
     .chips button{border:1px solid var(--line);background:#fff;border-radius:99px;padding:7px 14px;cursor:pointer;color:var(--ink)}
     .chips button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -69,9 +83,13 @@ import { Api, fcfa } from '../../core/api.service';
     .small{padding:7px 12px;font-size:13px;margin-top:10px}
     .mini{margin-top:10px;display:flex;flex-direction:column;gap:8px}
     .mini-actions{display:flex;align-items:center;gap:12px}
-    .lien{background:none;border:none;color:var(--gold);font-weight:600;cursor:pointer}
-    .envoye{margin-top:10px;color:var(--ok);font-size:13px;font-weight:600}
+    .lien{background:none;border:none;color:var(--gold);font-weight:600;cursor:pointer;font-size:13px}
+    .lien.danger{color:var(--bad)}
+    .envoye{font-size:12px;color:var(--muted)}
+    .apres{margin-top:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+    .annule{margin-top:8px;color:var(--bad);font-size:12px;font-style:italic}
     .err{margin-top:8px;color:var(--bad);font-size:13px}
+    textarea.input{resize:vertical}
   `],
 })
 export class Loyers implements OnInit {
@@ -81,10 +99,15 @@ export class Loyers implements OnInit {
   filtre = signal<'tous' | 'impayes' | 'payes'>('tous');
   periode = new Date().toISOString().slice(0, 7);
   fcfa = fcfa;
+  q = '';
 
   formOuvert = signal<number | null>(null);
   montantForm = 0;
   modeForm: 'especes' | 'wave' | 'orange_money' = 'especes';
+
+  annulationOuverte = signal<number | null>(null);
+  motifAnnulation = '';
+
   erreur = signal<number | null>(null);
   erreurMsg = signal('');
 
@@ -114,7 +137,7 @@ export class Loyers implements OnInit {
           paiementId: paiement?.id ?? null,
           paye: paiement?.statut === 'paye',
           recuEnvoye: !!paiement?.recu_envoye_at,
-          recuEnvoyeLabel: paiement?.recu_envoye_at ? String(paiement.recu_envoye_at).slice(0, 10) : null,
+          annuleMotif: paiement?.statut === 'annule' ? paiement.motif_annulation : null,
         };
       }).filter(r => r.loyer > 0);
       this.rows.set(rows);
@@ -123,7 +146,10 @@ export class Loyers implements OnInit {
 
   view() {
     const f = this.filtre();
-    return this.rows().filter(r => f === 'tous' || (f === 'payes' ? r.paye : !r.paye));
+    const q = this.q.toLowerCase().trim();
+    return this.rows()
+      .filter(r => f === 'tous' || (f === 'payes' ? r.paye : !r.paye))
+      .filter(r => !q || r.name.toLowerCase().includes(q));
   }
 
   ouvrirForm(r: any) {
@@ -133,7 +159,7 @@ export class Loyers implements OnInit {
     this.formOuvert.set(r.id);
   }
 
-  async enregistrer(r: any) {
+  async confirmer(r: any) {
     this.busy.set(true);
     this.erreur.set(null);
     try {
@@ -154,7 +180,7 @@ export class Loyers implements OnInit {
     }
   }
 
-  async envoyerRecu(r: any) {
+  async renvoyerRecu(r: any) {
     this.busy.set(true);
     this.erreur.set(null);
     try {
@@ -163,6 +189,32 @@ export class Loyers implements OnInit {
     } catch (e: any) {
       this.erreur.set(r.id);
       this.erreurMsg.set(e?.error?.message || "Impossible d'envoyer le reçu.");
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  ouvrirAnnulation(r: any) {
+    this.motifAnnulation = '';
+    this.erreur.set(null);
+    this.annulationOuverte.set(r.id);
+  }
+
+  async confirmerAnnulation(r: any) {
+    if (this.motifAnnulation.trim().length < 5) {
+      this.erreur.set(r.id);
+      this.erreurMsg.set('Merci de préciser le motif (au moins 5 caractères).');
+      return;
+    }
+    this.busy.set(true);
+    this.erreur.set(null);
+    try {
+      await this.api.post(`/paiements/${r.paiementId}/annuler`, { motif: this.motifAnnulation.trim() });
+      this.annulationOuverte.set(null);
+      await this.charger();
+    } catch (e: any) {
+      this.erreur.set(r.id);
+      this.erreurMsg.set(e?.error?.message || "Impossible d'annuler ce paiement.");
     } finally {
       this.busy.set(false);
     }

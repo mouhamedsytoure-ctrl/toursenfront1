@@ -1,3 +1,3 @@
 export const environment = {
-  apiUrl: 'https://toursenback-production.up.railway.app/api',
+  apiUrl: 'https://api.sits-immo.com/api',
 };

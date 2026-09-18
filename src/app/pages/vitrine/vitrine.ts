@@ -330,7 +330,7 @@ import { Api } from '../../core/api.service';
 })
 export class Vitrine implements OnInit {
   items = signal<any[]>([]);
-  logo = environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg';
+  logo = new URL(environment.apiUrl).origin + '/logo-toursen.jpeg';
   loading = signal(true);
   contactOpen: number | null = null;
 

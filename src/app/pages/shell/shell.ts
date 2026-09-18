@@ -13,7 +13,7 @@ interface MenuItem { label: string; path: string; icon: string; superAdminOnly?:
   styleUrl: './shell.scss',
 })
 export class Shell {
-  logo = environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg';
+  logo = new URL(environment.apiUrl).origin + '/logo-toursen.jpeg';
   open = signal(false); // menu mobile
 
   menu: MenuItem[] = [

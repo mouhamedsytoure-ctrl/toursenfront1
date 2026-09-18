@@ -205,7 +205,7 @@ import { AuthService } from '../../core/auth.service';
   `],
 })
 export class Espace implements OnInit {
-  logo = environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg';
+  logo = new URL(environment.apiUrl).origin + '/logo-toursen.jpeg';
   tab = signal<'accueil' | 'contrat' | 'paiements' | 'reclam'>('accueil');
   loading = signal(true);
   busy = signal(false);

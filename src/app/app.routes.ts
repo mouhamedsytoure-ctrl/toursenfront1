@@ -31,6 +31,7 @@ export const routes: Routes = [
       { path: 'transferts',      loadComponent: () => import('./pages/transferts/transferts').then(m => m.Transferts) },
       { path: 'envois',          loadComponent: () => import('./pages/envois/envois').then(m => m.Envois) },
       { path: 'utilisateurs',     loadComponent: () => import('./pages/utilisateurs/utilisateurs').then(m => m.Utilisateurs) },
+      { path: 'guide',            loadComponent: () => import('./pages/guide/guide').then(m => m.Guide) },
     ],
   },
 

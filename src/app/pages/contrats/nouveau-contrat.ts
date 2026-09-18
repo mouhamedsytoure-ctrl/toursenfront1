@@ -101,9 +101,10 @@ import { Api } from '../../core/api.service';
       <label class="flabel">Date de fin <span class="req">*</span></label>
       <input class="input" [class.inp-err]="submitted&&!f.date_fin" type="date" [(ngModel)]="f.date_fin"/>
       <label class="flabel">Loyer (FCFA) <span class="req">*</span></label>
-      <input class="input" [class.inp-err]="submitted&&!f.montant_loyer" type="number" placeholder="ex: 150000" [(ngModel)]="f.montant_loyer"/>
+      <input class="input" [class.inp-err]="submitted&&!f.montant_loyer" type="number" placeholder="ex: 150000" [(ngModel)]="f.montant_loyer" (ngModelChange)="onLoyerChange($event)"/>
       <label class="flabel">Caution (FCFA) <span class="req">*</span></label>
       <input class="input" [class.inp-err]="submitted&&!f.caution" type="number" placeholder="ex: 300000" [(ngModel)]="f.caution"/>
+      <p class="hint">Pré-remplie à 3x le loyer, modifiable si besoin (ex: locataire déjà en place avec un autre montant).</p>
       <label class="flabel">Jour d'échéance <span class="req">*</span></label>
       <input class="input" [class.inp-err]="submitted&&!f.jour_echeance" type="number" placeholder="1 à 31" [(ngModel)]="f.jour_echeance"/>
       <label class="flabel">Mot de passe (laisser vide = généré automatiquement)</label>
@@ -113,7 +114,13 @@ import { Api } from '../../core/api.service';
     @if (error()) { <div class="err">{{ error() }}</div> }
     @if (emailConnexion()) {
       <div class="ok">
-        Compte créé. Un email de bienvenue a été envoyé à {{ f.preneur_email }}.<br/>
+        Compte créé.
+        @if (emailEnvoye()) {
+          Un email de bienvenue a été envoyé à {{ f.preneur_email }}.
+        } @else {
+          <b>⚠ L'email de bienvenue n'a pas pu être envoyé</b> (à communiquer vous-même pour l'instant).
+        }
+        <br/>
         Identifiant de connexion : <b>{{ emailConnexion() }}</b><br/>
         @if (motDePasse()) { Mot de passe : <b>{{ motDePasse() }}</b> }
       </div>
@@ -153,6 +160,7 @@ export class NouveauContrat implements OnInit {
   error = signal<string | null>(null);
   motDePasse = signal<string | null>(null);
   emailConnexion = signal<string | null>(null);
+  emailEnvoye = signal(true);
   contratCreeId: number | null = null;
   submitted = false;
 
@@ -185,7 +193,14 @@ export class NouveauContrat implements OnInit {
   etages(): number[] { const s = new Set<number>(); this.dispo().forEach(l => s.add(l.etage ?? 0)); return [...s].sort((a, b) => a - b); }
   chambresOf(): any[] { return this.dispo().filter(l => (l.etage ?? 0) === this.etage); }
   etageLabel(e: number) { return e === 0 ? 'Rez-de-chaussée' : (e === 1 ? '1er étage' : e + 'e étage'); }
-  onChambre(l: any) { if (l && !this.f.montant_loyer) this.f.montant_loyer = Math.round(l.loyer); }
+  onChambre(l: any) {
+    if (!l) return;
+    if (!this.f.montant_loyer) this.f.montant_loyer = Math.round(l.loyer);
+    this.onLoyerChange(this.f.montant_loyer);
+  }
+  onLoyerChange(loyer: number | null) {
+    if (loyer) this.f.caution = Math.round(loyer * 3);
+  }
 
   async save() {
     this.submitted = true;
@@ -222,6 +237,7 @@ export class NouveauContrat implements OnInit {
       const res: any = await this.api.post('/contrats', body);
       this.contratCreeId = res.contrat.id;
       if (res?.mot_de_passe) { this.motDePasse.set(res.mot_de_passe); }
+      this.emailEnvoye.set(res?.email_envoye !== false);
       this.emailConnexion.set(res?.email_connexion || null);
       if (!res?.email_connexion) { this.router.navigate(['/app/contrats', res.contrat.id]); }
     } catch (e: any) {

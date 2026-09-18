@@ -25,6 +25,7 @@ import { Api, fcfa } from '../../core/api.service';
             </span>
           </div>
 
+          @if (r.premierMois) { <div class="info-mois">Mois d'entrée — couvert par la caution versée à la signature</div> }
           @if (r.annuleMotif) { <div class="annule">↺ Dernier paiement annulé : « {{ r.annuleMotif }} »</div> }
 
           @if (!r.paye && r.contratId) {
@@ -88,6 +89,7 @@ import { Api, fcfa } from '../../core/api.service';
     .envoye{font-size:12px;color:var(--muted)}
     .apres{margin-top:10px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
     .annule{margin-top:8px;color:var(--bad);font-size:12px;font-style:italic}
+    .info-mois{margin-top:8px;color:var(--muted);font-size:12px;font-style:italic}
     .err{margin-top:8px;color:var(--bad);font-size:13px}
     textarea.input{resize:vertical}
   `],
@@ -130,12 +132,16 @@ export class Loyers implements OnInit {
       const rows = (locs as any[]).map(l => {
         const c = (l.contrats || [])[0]; const lg = c?.logement; const im = lg?.immeuble;
         const paiement = c ? paiementsDeLaPeriode.get(c.id) : null;
+        // Le mois d'entree est deja couvert par la caution versee a la
+        // signature : jamais signale comme impaye.
+        const premierMois = !!c?.date_debut && String(c.date_debut).slice(0, 7) === this.periode;
         return {
           id: l.id, name: l.name, loyer: c?.montant_loyer || 0,
           logement: lg ? `${im?.nom || ''} - ${lg.reference || ''}` : '—',
           contratId: c?.id ?? null,
           paiementId: paiement?.id ?? null,
-          paye: paiement?.statut === 'paye',
+          paye: paiement?.statut === 'paye' || premierMois,
+          premierMois,
           recuEnvoye: !!paiement?.recu_envoye_at,
           annuleMotif: paiement?.statut === 'annule' ? paiement.motif_annulation : null,
         };

@@ -33,8 +33,9 @@ import { Api } from '../../core/api.service';
 
     <div class="card">
       <h3>2. Identité du preneur</h3>
-      <label class="flabel">Civilité <span class="req">*</span></label>
-      <select class="input" [class.inp-err]="submitted&&!f.preneur_civilite" [(ngModel)]="f.preneur_civilite">
+      <p class="hint">Seuls Nom, Email de contact, Loyer et les dates sont obligatoires — le reste est utile pour le contrat mais peut être laissé vide et complété plus tard (pratique pour ressaisir vite un locataire déjà en place).</p>
+      <label class="flabel">Civilité</label>
+      <select class="input" [(ngModel)]="f.preneur_civilite">
         <option value="">— Choisir —</option>
         <option value="Monsieur">Monsieur</option>
         <option value="Madame">Madame</option>
@@ -42,23 +43,23 @@ import { Api } from '../../core/api.service';
       </select>
       <label class="flabel">Nom <span class="req">*</span></label>
       <input class="input" [class.inp-err]="submitted&&!f.preneur_nom" placeholder="Nom du locataire" [(ngModel)]="f.preneur_nom"/>
-      <label class="flabel">Prénom <span class="req">*</span></label>
-      <input class="input" [class.inp-err]="submitted&&!f.preneur_prenom" placeholder="Prénom" [(ngModel)]="f.preneur_prenom"/>
-      <label class="flabel">Téléphone <span class="req">*</span></label>
-      <input class="input" [class.inp-err]="submitted&&!f.preneur_telephone" placeholder="77 000 00 00" [(ngModel)]="f.preneur_telephone"/>
+      <label class="flabel">Prénom</label>
+      <input class="input" placeholder="Prénom" [(ngModel)]="f.preneur_prenom"/>
+      <label class="flabel">Téléphone</label>
+      <input class="input" placeholder="77 000 00 00" [(ngModel)]="f.preneur_telephone"/>
       <label class="flabel">Email de contact <span class="req">*</span></label>
       <input class="input" [class.inp-err]="submitted&&!f.preneur_email" placeholder="email@exemple.com" [(ngModel)]="f.preneur_email"/>
       <p class="hint">C'est ici que le locataire recevra ses messages (bienvenue, reçus...). Son identifiant de connexion à l'application sera généré automatiquement.</p>
-      <label class="flabel">Adresse <span class="req">*</span></label>
-      <input class="input" [class.inp-err]="submitted&&!f.preneur_adresse" placeholder="Adresse actuelle" [(ngModel)]="f.preneur_adresse"/>
-      <label class="flabel">Profession <span class="req">*</span></label>
-      <input class="input" [class.inp-err]="submitted&&!f.preneur_profession" placeholder="Profession" [(ngModel)]="f.preneur_profession"/>
-      <label class="flabel">Nationalité <span class="req">*</span></label>
-      <input class="input" [class.inp-err]="submitted&&!f.preneur_nationalite" placeholder="Nationalité" [(ngModel)]="f.preneur_nationalite"/>
-      <label class="flabel">Lieu de naissance <span class="req">*</span></label>
-      <input class="input" [class.inp-err]="submitted&&!f.preneur_lieu_naissance" placeholder="Lieu de naissance" [(ngModel)]="f.preneur_lieu_naissance"/>
-      <label class="flabel">Date de naissance <span class="req">*</span></label>
-      <div class="row3" [class.inp-err]="submitted&&(!dnJour||!dnMois||!dnAnnee)">
+      <label class="flabel">Adresse</label>
+      <input class="input" placeholder="Adresse actuelle" [(ngModel)]="f.preneur_adresse"/>
+      <label class="flabel">Profession</label>
+      <input class="input" placeholder="Profession" [(ngModel)]="f.preneur_profession"/>
+      <label class="flabel">Nationalité</label>
+      <input class="input" placeholder="Nationalité" [(ngModel)]="f.preneur_nationalite"/>
+      <label class="flabel">Lieu de naissance</label>
+      <input class="input" placeholder="Lieu de naissance" [(ngModel)]="f.preneur_lieu_naissance"/>
+      <label class="flabel">Date de naissance</label>
+      <div class="row3">
         <select class="input" [(ngModel)]="dnJour">
           <option value="">Jour</option>
           @for (j of jours; track j) { <option [value]="j">{{ j }}</option> }
@@ -76,21 +77,21 @@ import { Api } from '../../core/api.service';
 
     <div class="card">
       <h3>3. Pièce d'identité</h3>
-      <label class="flabel">Type de pièce <span class="req">*</span></label>
+      <label class="flabel">Type de pièce</label>
       <select class="input" [(ngModel)]="f.preneur_piece_type">
         <option value="cni">CNI</option>
         <option value="passeport">Passeport</option>
         <option value="permis">Permis</option>
         <option value="autre">Autre</option>
       </select>
-      <label class="flabel">Numéro de pièce <span class="req">*</span></label>
-      <input class="input" [class.inp-err]="submitted&&!f.preneur_piece_numero" placeholder="Numéro de pièce" [(ngModel)]="f.preneur_piece_numero"/>
+      <label class="flabel">Numéro de pièce</label>
+      <input class="input" placeholder="Numéro de pièce" [(ngModel)]="f.preneur_piece_numero"/>
     </div>
 
     <div class="card">
       <h3>4. Contrat</h3>
-      <label class="flabel">Composition <span class="req">*</span></label>
-      <input class="input" [class.inp-err]="submitted&&!f.composition" placeholder="ex: 01 Séjour, 01 Chambre..." [(ngModel)]="f.composition"/>
+      <label class="flabel">Composition</label>
+      <input class="input" placeholder="ex: 01 Séjour, 01 Chambre..." [(ngModel)]="f.composition"/>
       <label class="flabel">Usage <span class="req">*</span></label>
       <select class="input" [(ngModel)]="f.usage">
         <option value="domestique">Usage domestique</option>
@@ -206,20 +207,16 @@ export class NouveauContrat implements OnInit {
     this.submitted = true;
     this.error.set(null);
     if (!this.chambre) { this.error.set('Choisissez un logement.'); return; }
+    // Seul l'essentiel est obligatoire (identique a ce que le serveur exige) :
+    // le reste (civilite, telephone, adresse, profession, piece d'identite...)
+    // reste remplissable mais optionnel, utile pour aller vite avec un
+    // locataire deja en place dont on ressaisit juste le contrat existant.
     const manquants = [];
-    if (!this.f.preneur_civilite) manquants.push('Civilité');
     if (!this.f.preneur_nom) manquants.push('Nom');
-    if (!this.f.preneur_prenom) manquants.push('Prénom');
-    if (!this.f.preneur_telephone) manquants.push('Téléphone');
     if (!this.f.preneur_email) manquants.push('Email');
-    if (!this.f.preneur_adresse) manquants.push('Adresse');
-    if (!this.f.preneur_profession) manquants.push('Profession');
-    if (!this.f.preneur_nationalite) manquants.push('Nationalité');
-    if (!this.f.preneur_lieu_naissance) manquants.push('Lieu de naissance');
-    if (!this.dnJour || !this.dnMois || !this.dnAnnee) manquants.push('Date de naissance');
-    if (!this.f.preneur_piece_numero) manquants.push('Numéro de pièce');
-    if (!this.f.composition) manquants.push('Composition');
     if (!this.f.date_debut) manquants.push('Date de début');
+    if (!this.f.date_fin) manquants.push('Date de fin');
+    if (!this.f.montant_loyer) manquants.push('Loyer');
     if (!this.f.date_fin) manquants.push('Date de fin');
     if (!this.f.montant_loyer) manquants.push('Loyer');
     if (!this.f.caution) manquants.push('Caution');

@@ -53,6 +53,31 @@ import { AuthService } from '../../core/auth.service';
         </div>
       }
 
+      @if (!ct.archived_at && ct.statut === 'actif') {
+        <h3>Renouvellement</h3>
+        <div class="card">
+          <p class="muted">
+            Prolonge ce contrat sans créer un nouveau compte : le locataire garde le même
+            identifiant de connexion et tout son historique de paiements.
+          </p>
+          @if (!renouvOuvert()) {
+            <button class="btn ghost" (click)="ouvrirRenouvellement(ct)">Renouveler</button>
+          } @else {
+            <label class="flabel">Nouvelle date de fin <span class="req">*</span></label>
+            <input class="input" type="date" [(ngModel)]="renouvDateFin" />
+            <label class="flabel">Nouveau loyer (FCFA, optionnel — laisser vide pour ne pas changer)</label>
+            <input class="input" type="number" [(ngModel)]="renouvLoyer" />
+            <label class="flabel">Nouvelle caution (FCFA, optionnel)</label>
+            <input class="input" type="number" [(ngModel)]="renouvCaution" />
+            @if (renouvErreur()) { <div class="err">{{ renouvErreur() }}</div> }
+            <div class="actions">
+              <button class="btn btn-gold" [disabled]="renouvBusy()" (click)="renouveler(ct)">Confirmer le renouvellement</button>
+              <button class="btn ghost" (click)="renouvOuvert.set(false)">Annuler</button>
+            </div>
+          }
+        </div>
+      }
+
       @if (estSuperAdmin()) {
         <h3>Accès du locataire</h3>
         <div class="card">
@@ -105,6 +130,8 @@ import { AuthService } from '../../core/auth.service';
     pre{white-space:pre-wrap;font-family:inherit;font-size:13.5px;line-height:1.55;color:var(--ink);margin:0}
     .flabel{display:block;font-size:12px;color:var(--muted);font-weight:600;margin:8px 0 4px}
     .ok{color:var(--ok);margin:10px 0;background:#E7F1EC;padding:10px;border-radius:10px;font-size:13.5px}
+    .req{color:var(--bad)}
+    .err{color:var(--bad);margin:8px 0;font-size:13px}
   `],
 })
 export class ContratDetail implements OnInit {
@@ -118,9 +145,41 @@ export class ContratDetail implements OnInit {
   reinitResultat = signal<any>(null);
   nouvelEmailContact = '';
 
+  renouvOuvert = signal(false);
+  renouvBusy = signal(false);
+  renouvErreur = signal<string | null>(null);
+  renouvDateFin = '';
+  renouvLoyer: number | null = null;
+  renouvCaution: number | null = null;
+
   constructor(private api: Api, private route: ActivatedRoute, private http: HttpClient, private auth: AuthService) {}
   async ngOnInit() { await this.load(); }
   estSuperAdmin() { return this.auth.role() === 'super_admin'; }
+  ouvrirRenouvellement(ct: any) {
+    this.renouvDateFin = '';
+    this.renouvLoyer = null;
+    this.renouvCaution = null;
+    this.renouvErreur.set(null);
+    this.renouvOuvert.set(true);
+  }
+  async renouveler(ct: any) {
+    if (!this.renouvDateFin) {
+      this.renouvErreur.set('Merci de choisir une nouvelle date de fin.');
+      return;
+    }
+    this.renouvBusy.set(true);
+    this.renouvErreur.set(null);
+    try {
+      const body: any = { date_fin: this.renouvDateFin };
+      if (this.renouvLoyer) body.montant_loyer = this.renouvLoyer;
+      if (this.renouvCaution) body.caution = this.renouvCaution;
+      await this.api.put('/contrats/' + ct.id + '/renouveler', body);
+      this.renouvOuvert.set(false);
+      await this.load();
+    } catch (e: any) {
+      this.renouvErreur.set(e?.error?.message || e?.error?.errors?.date_fin?.[0] || 'Impossible de renouveler ce contrat.');
+    } finally { this.renouvBusy.set(false); }
+  }
   async reinitialiser() {
     this.reinitBusy.set(true);
     try {

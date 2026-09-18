@@ -12,7 +12,7 @@ import { environment } from '../../../environments/environment';
   styleUrl: './login.scss',
 })
 export class Login {
-  logo = environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg';
+  logo = new URL(environment.apiUrl).origin + '/logo-toursen.jpeg';
   email = '';
   password = '';
   showPwd = false;

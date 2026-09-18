@@ -64,7 +64,7 @@ import { environment } from '../../../environments/environment';
   `],
 })
 export class Apropos {
-  logo = environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg';
+  logo = new URL(environment.apiUrl).origin + '/logo-toursen.jpeg';
   constructor(private location: Location) {}
   retour() { this.location.back(); }
 }

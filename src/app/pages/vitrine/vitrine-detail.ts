@@ -109,7 +109,7 @@ import { Api, fcfa } from '../../core/api.service';
   `],
 })
 export class VitrineDetail implements OnInit {
-  logo = environment.apiUrl.replace('/api', '') + '/logo-toursen.jpeg';
+  logo = new URL(environment.apiUrl).origin + '/logo-toursen.jpeg';
   im = signal<any>(null);
   loading = signal(true);
   gallery = signal<string[] | null>(null);

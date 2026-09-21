@@ -19,21 +19,28 @@ import { environment } from '../../../environments/environment';
 
       <div class="card">
         <p>
-          <b>SITS</b> (Société Immobilière de Travaux et Services) est une entreprise
-          sénégalaise basée à Dakar, spécialisée dans la <b>gestion locative</b> :
-          mise en location et suivi de biens immobiliers — immeubles, appartements,
-          studios, locaux commerciaux et terrains.
+          À Dakar, la gestion d'un bien immobilier rime trop souvent avec paperasse
+          égarée, appels sans réponse et quittances griffonnées à la main. C'est
+          précisément ce que <b>SITS</b> (Société Immobilière de Travaux et Services)
+          a voulu changer : une gestion locative sérieuse, où chaque immeuble,
+          appartement, studio, local commercial ou terrain est suivi avec la même
+          rigueur, du premier jour de location jusqu'au renouvellement du bail.
         </p>
         <p>
-          Fondée et dirigée par <b>Moustapha Touré</b>, l'entreprise met un point d'honneur
-          à offrir un service de proximité, transparent et rigoureux, aussi bien aux
-          propriétaires qu'aux locataires : contrats clairs, quittances en règle,
-          suivi rigoureux des loyers et traitement rapide des réclamations.
+          Fondée et dirigée par <b>Moustapha Touré</b>, l'agence s'est bâtie sur une
+          conviction simple : un propriétaire mérite de savoir exactement où en est
+          son bien, et un locataire mérite un interlocuteur clair et joignable.
+          Contrats limpides, quittances en règle, loyers suivis de près, réclamations
+          traitées sans délai — c'est cette exigence qui fait la réputation de SITS
+          depuis ses débuts.
         </p>
         <p>
-          Avec cette plateforme, SITS franchit un cap dans sa gestion au quotidien :
-          paiements suivis en temps réel, contrats et reçus numériques archivés,
-          et une vitrine en ligne pour découvrir les logements disponibles.
+          Cette plateforme prolonge cette même exigence dans le numérique : chaque
+          paiement est enregistré et confirmé en temps réel, chaque contrat et chaque
+          reçu partent automatiquement par email, et une vitrine en ligne permet de
+          découvrir à tout moment les logements disponibles — pour que la confiance
+          entre SITS, ses propriétaires et ses locataires se construise sur des faits,
+          pas sur des promesses.
         </p>
       </div>
 

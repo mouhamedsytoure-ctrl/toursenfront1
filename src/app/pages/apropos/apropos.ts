@@ -19,28 +19,28 @@ import { environment } from '../../../environments/environment';
 
       <div class="card">
         <p>
-          À Dakar, la gestion d'un bien immobilier rime trop souvent avec paperasse
-          égarée, appels sans réponse et quittances griffonnées à la main. C'est
-          précisément ce que <b>SITS</b> (Société Immobilière de Travaux et Services)
-          a voulu changer : une gestion locative sérieuse, où chaque immeuble,
-          appartement, studio, local commercial ou terrain est suivi avec la même
-          rigueur, du premier jour de location jusqu'au renouvellement du bail.
+          Gérer un immeuble à Dakar, ça peut vite tourner à la course : papiers
+          égarés, appels qui restent sans réponse, quittance griffonnée sur un
+          bout de papier. <b>SITS</b> (Société Immobilière de Travaux et Services)
+          a été créée pour éviter tout ça. Ici, chaque immeuble, appartement,
+          studio, local commercial ou terrain est suivi sérieusement, du jour où
+          le locataire s'installe jusqu'au renouvellement de son bail.
         </p>
         <p>
-          Fondée et dirigée par <b>Moustapha Touré</b>, l'agence s'est bâtie sur une
-          conviction simple : un propriétaire mérite de savoir exactement où en est
-          son bien, et un locataire mérite un interlocuteur clair et joignable.
-          Contrats limpides, quittances en règle, loyers suivis de près, réclamations
-          traitées sans délai — c'est cette exigence qui fait la réputation de SITS
-          depuis ses débuts.
+          L'agence est dirigée par <b>Moustapha Touré</b>, avec une idée assez
+          simple en tête : un propriétaire doit savoir où en est son bien, et un
+          locataire doit pouvoir joindre quelqu'un facilement. Contrats clairs,
+          quittances en règle, loyers suivis de près, réclamations traitées
+          rapidement. C'est ce qui a fait la réputation de SITS depuis le début.
         </p>
         <p>
-          Cette plateforme prolonge cette même exigence dans le numérique : chaque
-          paiement est enregistré et confirmé en temps réel, chaque contrat et chaque
-          reçu partent automatiquement par email, et une vitrine en ligne permet de
-          découvrir à tout moment les logements disponibles — pour que la confiance
-          entre SITS, ses propriétaires et ses locataires se construise sur des faits,
-          pas sur des promesses.
+          Cette application n'est que le prolongement de cette façon de
+          travailler. Les paiements sont enregistrés au fur et à mesure, les
+          contrats et les reçus partent par email automatiquement, et une
+          vitrine en ligne permet de voir les logements encore disponibles.
+          Rien de plus : juste un moyen de garder la confiance entre SITS, ses
+          propriétaires et ses locataires, sur des faits plutôt que sur des
+          promesses.
         </p>
       </div>
 

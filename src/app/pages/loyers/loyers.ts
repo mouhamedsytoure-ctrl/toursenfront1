@@ -21,7 +21,7 @@ import { Api, fcfa } from '../../core/api.service';
           <div class="rtop">
             <div class="info"><div class="nm">{{ r.name }}</div><div class="sub">{{ r.logement }} · {{ fcfa(r.loyer) }} FCFA</div></div>
             <span class="badge" [style.background]="r.paye ? '#E7F1EC' : (r.premierMois ? '#FBF3E6' : '#FBE3E0')" [style.color]="r.paye ? 'var(--ok)' : (r.premierMois ? 'var(--gold)' : 'var(--bad)')">
-              {{ r.paye ? 'Payé' : (r.premierMois ? 'Mois d\'entrée' : 'Non payé') }}
+              {{ statutLabel(r) }}
             </span>
           </div>
 
@@ -160,6 +160,12 @@ export class Loyers implements OnInit {
     return this.rows()
       .filter(r => f === 'tous' || (f === 'payes' ? r.paye : !r.paye))
       .filter(r => !q || r.name.toLowerCase().includes(q));
+  }
+
+  statutLabel(r: any): string {
+    if (r.paye) return 'Payé';
+    if (r.premierMois) return "Mois d'entrée";
+    return 'Non payé';
   }
 
   ouvrirForm(r: any) {

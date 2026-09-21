@@ -10,7 +10,7 @@ import { Api } from '../../core/api.service';
   template: `
     <!-- NAV -->
     <nav class="nav">
-      <a class="brand" routerLink="/apropos"><img [src]="logo" alt="Toursen"/></a>
+      <a class="brand" routerLink="/apropos"><img [src]="logo" alt="SITS SUARL"/></a>
       <a class="nav-btn" routerLink="/login">Mon espace →</a>
     </nav>
 
@@ -113,17 +113,17 @@ import { Api } from '../../core/api.service';
     <footer class="footer">
       <div class="footer-grid">
         <div>
-          <img [src]="logo" alt="Toursen" class="flogo"/>
+          <img [src]="logo" alt="SITS SUARL" class="flogo"/>
           <p class="fdesc">Votre partenaire immobilier à Dakar.</p>
         </div>
         <div>
           <p class="ftitle">Contact</p>
           <p>📍 Rue 13x12 Médina, Dakar</p>
           <p>📞 77 566 03 77 / 77 735 37 72</p>
-          <p>✉️ toursen.immo&#64;gmail.com</p>
+          <p>✉️ sitssuarl&#64;gmail.com</p>
         </div>
       </div>
-      <p class="fcopy">© 2025 Toursen Immobilier. Tous droits réservés.</p>
+      <p class="fcopy">© 2025 SITS SUARL. Tous droits réservés.</p>
     </footer>
   `,
   styles: [`

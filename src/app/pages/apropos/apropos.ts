@@ -40,7 +40,7 @@ import { environment } from '../../../environments/environment';
         <h3>Coordonnées</h3>
         <p>📍 Médina, rue 13 X 12, Dakar, Sénégal</p>
         <p>📞 77 566 03 77 / 77 735 37 72</p>
-        <p>✉️ toursen.immo&#64;gmail.com</p>
+        <p>✉️ sitssuarl&#64;gmail.com</p>
       </div>
 
       <p class="note">Texte de présentation modifiable à tout moment.</p>

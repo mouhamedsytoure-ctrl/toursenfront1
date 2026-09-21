@@ -20,19 +20,20 @@ import { environment } from '../../../environments/environment';
       <div class="card">
         <p>
           <b>SITS</b> (Société Immobilière de Travaux et Services) est une entreprise
-          sénégalaise basée à Dakar, spécialisée dans la <b>gestion locative</b>,
-          la mise en location et le suivi de biens immobiliers (immeubles, appartements,
-          studios, locaux commerciaux et terrains).
+          sénégalaise basée à Dakar, spécialisée dans la <b>gestion locative</b> :
+          mise en location et suivi de biens immobiliers — immeubles, appartements,
+          studios, locaux commerciaux et terrains.
         </p>
         <p>
           Fondée et dirigée par <b>Moustapha Touré</b>, l'entreprise met un point d'honneur
           à offrir un service de proximité, transparent et rigoureux, aussi bien aux
           propriétaires qu'aux locataires : contrats clairs, quittances en règle,
-          suivi des loyers et traitement rapide des réclamations.
+          suivi rigoureux des loyers et traitement rapide des réclamations.
         </p>
         <p>
-          Grâce à cette plateforme, SITS modernise sa gestion : suivi des paiements,
-          contrats et reçus numériques, et une vitrine en ligne des logements disponibles.
+          Avec cette plateforme, SITS franchit un cap dans sa gestion au quotidien :
+          paiements suivis en temps réel, contrats et reçus numériques archivés,
+          et une vitrine en ligne pour découvrir les logements disponibles.
         </p>
       </div>
 
@@ -43,7 +44,11 @@ import { environment } from '../../../environments/environment';
         <p>✉️ sitssuarl&#64;gmail.com</p>
       </div>
 
-      <p class="note">Texte de présentation modifiable à tout moment.</p>
+      <p class="credit">
+        Site développé par <b>Mouhamed Sy Touré</b>
+        · <a href="mailto:mouhamedsy.toure&#64;uahb.sn">mouhamedsy.toure&#64;uahb.sn</a>
+        · <a href="https://www.linkedin.com/in/mouhamed-sy-toure-17bbb4385" target="_blank" rel="noopener">LinkedIn</a>
+      </p>
     </div>
   `,
   styles: [`
@@ -60,7 +65,9 @@ import { environment } from '../../../environments/environment';
     .card p{color:var(--ink);line-height:1.6;margin:0 0 10px}
     .coords h3{color:var(--ink);margin:0 0 8px}
     .coords p{margin:4px 0;color:var(--ink)}
-    .note{color:var(--muted);font-size:12px}
+    .credit{color:var(--muted);font-size:12px;margin-top:6px}
+    .credit a{color:var(--gold);font-weight:600;text-decoration:none}
+    .credit a:hover{text-decoration:underline}
   `],
 })
 export class Apropos {

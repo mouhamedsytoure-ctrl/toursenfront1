@@ -103,9 +103,17 @@ import { Api } from '../../core/api.service';
       <input class="input" [class.inp-err]="submitted&&!f.date_fin" type="date" [(ngModel)]="f.date_fin"/>
       <label class="flabel">Loyer (FCFA) <span class="req">*</span></label>
       <input class="input" [class.inp-err]="submitted&&!f.montant_loyer" type="number" placeholder="ex: 150000" [(ngModel)]="f.montant_loyer" (ngModelChange)="onLoyerChange($event)"/>
+      <label class="flabel">Caution — nombre de mois de loyer</label>
+      <select class="input" [(ngModel)]="moisCaution" (ngModelChange)="onLoyerChange(f.montant_loyer)">
+        <option [ngValue]="1">1 mois</option>
+        <option [ngValue]="2">2 mois</option>
+        <option [ngValue]="3">3 mois</option>
+        <option [ngValue]="4">4 mois</option>
+        <option [ngValue]="null">Personnalisé (saisie libre)</option>
+      </select>
       <label class="flabel">Caution (FCFA) <span class="req">*</span></label>
-      <input class="input" [class.inp-err]="submitted&&!f.caution" type="number" placeholder="ex: 300000" [(ngModel)]="f.caution"/>
-      <p class="hint">Pré-remplie à 3x le loyer, modifiable si besoin (ex: locataire déjà en place avec un autre montant).</p>
+      <input class="input" [class.inp-err]="submitted&&!f.caution" type="number" placeholder="ex: 300000" [(ngModel)]="f.caution" [disabled]="moisCaution !== null"/>
+      <p class="hint">@if (moisCaution !== null) { Calculée automatiquement ({{ moisCaution }} mois de loyer). } @else { Saisie libre — modifiez le montant directement. }</p>
       <label class="flabel">Jour d'échéance <span class="req">*</span></label>
       <input class="input" [class.inp-err]="submitted&&!f.jour_echeance" type="number" placeholder="1 à 31" [(ngModel)]="f.jour_echeance"/>
       <label class="flabel">Mot de passe (laisser vide = généré automatiquement)</label>
@@ -182,6 +190,7 @@ export class NouveauContrat implements OnInit {
     composition: '', usage: 'domestique',
     date_debut: '', date_fin: '', montant_loyer: null, caution: null, jour_echeance: 5, password: '',
   };
+  moisCaution: number | null = 3;
 
   constructor(private api: Api, private router: Router) {}
   async ngOnInit() { this.immeubles.set(await this.api.get('/immeubles')); }
@@ -200,7 +209,7 @@ export class NouveauContrat implements OnInit {
     this.onLoyerChange(this.f.montant_loyer);
   }
   onLoyerChange(loyer: number | null) {
-    if (loyer) this.f.caution = Math.round(loyer * 3);
+    if (loyer && this.moisCaution !== null) this.f.caution = Math.round(loyer * this.moisCaution);
   }
 
   async save() {

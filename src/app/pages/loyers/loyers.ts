@@ -20,12 +20,12 @@ import { Api, fcfa } from '../../core/api.service';
         <div class="card row">
           <div class="rtop">
             <div class="info"><div class="nm">{{ r.name }}</div><div class="sub">{{ r.logement }} · {{ fcfa(r.loyer) }} FCFA</div></div>
-            <span class="badge" [style.background]="r.paye ? '#E7F1EC':'#FBE3E0'" [style.color]="r.paye ? 'var(--ok)':'var(--bad)'">
-              {{ r.paye ? 'Payé' : 'Non payé' }}
+            <span class="badge" [style.background]="r.paye ? '#E7F1EC' : (r.premierMois ? '#FBF3E6' : '#FBE3E0')" [style.color]="r.paye ? 'var(--ok)' : (r.premierMois ? 'var(--gold)' : 'var(--bad)')">
+              {{ r.paye ? 'Payé' : (r.premierMois ? 'Mois d\'entrée' : 'Non payé') }}
             </span>
           </div>
 
-          @if (r.premierMois) { <div class="info-mois">Mois d'entrée — couvert par la caution versée à la signature</div> }
+          @if (r.premierMois && !r.paye) { <div class="info-mois">Couvert par la caution versée à la signature — vous pouvez quand même enregistrer un paiement ci-dessous si besoin.</div> }
           @if (r.annuleMotif) { <div class="annule">↺ Dernier paiement annulé : « {{ r.annuleMotif }} »</div> }
 
           @if (!r.paye && r.contratId) {
@@ -140,7 +140,11 @@ export class Loyers implements OnInit {
           logement: lg ? `${im?.nom || ''} - ${lg.reference || ''}` : '—',
           contratId: c?.id ?? null,
           paiementId: paiement?.id ?? null,
-          paye: paiement?.statut === 'paye' || premierMois,
+          // Statut reel : seul un vrai paiement confirme compte comme "Paye".
+          // Le mois d'entree n'affiche plus d'alerte, mais n'empeche plus
+          // d'enregistrer un paiement si vous le souhaitez (utile pour tester,
+          // ou si l'agence veut quand meme tracer ce premier versement).
+          paye: paiement?.statut === 'paye',
           premierMois,
           recuEnvoye: !!paiement?.recu_envoye_at,
           annuleMotif: paiement?.statut === 'annule' ? paiement.motif_annulation : null,

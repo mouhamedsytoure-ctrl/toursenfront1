@@ -125,9 +125,9 @@ import { Api } from '../../core/api.service';
       <div class="ok">
         Compte créé.
         @if (emailEnvoye()) {
-          Un email de bienvenue a été envoyé à {{ f.preneur_email }}.
+          Un email de bienvenue va être envoyé à {{ f.preneur_email }} (sous quelques minutes).
         } @else {
-          <b>⚠ L'email de bienvenue n'a pas pu être envoyé</b> (à communiquer vous-même pour l'instant).
+          <b>⚠ L'email de bienvenue n'a pas pu être mis en attente d'envoi</b> (à communiquer vous-même pour l'instant).
         }
         <br/>
         Identifiant de connexion : <b>{{ emailConnexion() }}</b><br/>

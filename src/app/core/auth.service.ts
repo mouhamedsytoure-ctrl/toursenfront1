@@ -38,6 +38,11 @@ export class AuthService {
     localStorage.setItem('user', JSON.stringify(res.user));
   }
 
+  setUser(user: AppUser): void {
+    this._user.set(user);
+    localStorage.setItem('user', JSON.stringify(user));
+  }
+
   logout(): void {
     this._token.set(null);
     this._user.set(null);

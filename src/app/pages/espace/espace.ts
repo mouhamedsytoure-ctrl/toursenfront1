@@ -7,11 +7,12 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Api, fcfa } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
+import { Profil } from '../profil/profil';
 
 @Component({
   selector: 'app-espace',
   standalone: true,
-  imports: [FormsModule, SlicePipe],
+  imports: [FormsModule, SlicePipe, Profil],
   template: `
     <header class="top">
       <a class="brandbox" (click)="apropos()"><img [src]="logo" alt="SITS"/></a>
@@ -23,10 +24,12 @@ import { AuthService } from '../../core/auth.service';
       <button [class.on]="tab()==='contrat'" (click)="tab.set('contrat')">Contrat</button>
       <button [class.on]="tab()==='paiements'" (click)="tab.set('paiements')">Paiements</button>
       <button [class.on]="tab()==='reclam'" (click)="tab.set('reclam')">Réclamations</button>
+      <button [class.on]="tab()==='profil'" (click)="tab.set('profil')">Profil</button>
     </nav>
 
     <div class="wrap">
       @if (loading()) { <p class="muted">Chargement...</p> }
+      @else if (tab()==='profil') { <app-profil/> }
       @else if (!contrat()) { <div class="card"><p>Aucun contrat actif n'est associé à votre compte.</p></div> }
       @else {
         <!-- ACCUEIL -->
@@ -206,7 +209,7 @@ import { AuthService } from '../../core/auth.service';
 })
 export class Espace implements OnInit {
   logo = new URL(environment.apiUrl).origin + '/logo-toursen.jpeg';
-  tab = signal<'accueil' | 'contrat' | 'paiements' | 'reclam'>('accueil');
+  tab = signal<'accueil' | 'contrat' | 'paiements' | 'reclam' | 'profil'>('accueil');
   loading = signal(true);
   busy = signal(false);
   msg = signal<string | null>(null);

@@ -30,6 +30,7 @@ export const routes: Routes = [
       { path: 'envois',          loadComponent: () => import('./pages/envois/envois').then(m => m.Envois) },
       { path: 'utilisateurs',     loadComponent: () => import('./pages/utilisateurs/utilisateurs').then(m => m.Utilisateurs) },
       { path: 'guide',            loadComponent: () => import('./pages/guide/guide').then(m => m.Guide) },
+      { path: 'profil',           loadComponent: () => import('./pages/profil/profil').then(m => m.Profil) },
     ],
   },
 

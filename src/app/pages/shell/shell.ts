@@ -28,6 +28,7 @@ export class Shell {
     { label: 'Envois',          path: '/app/envois',       icon: '📨' },
     { label: 'Utilisateurs',    path: '/app/utilisateurs', icon: '🔑', superAdminOnly: true },
     { label: 'Guide',           path: '/app/guide',        icon: '📘', superAdminOnly: true },
+    { label: 'Mon profil',      path: '/app/profil',       icon: '👤' },
   ];
 
   constructor(public auth: AuthService, private router: Router) {}

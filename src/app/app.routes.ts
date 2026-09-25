@@ -22,6 +22,7 @@ export const routes: Routes = [
       { path: 'locataires',       loadComponent: () => import('./pages/locataires/locataires').then(m => m.Locataires) },
       { path: 'contrats',         loadComponent: () => import('./pages/contrats/contrats').then(m => m.Contrats) },
       { path: 'contrats/nouveau', loadComponent: () => import('./pages/contrats/nouveau-contrat').then(m => m.NouveauContrat) },
+      { path: 'contrats/deja-present', loadComponent: () => import('./pages/contrats/locataire-existant').then(m => m.LocataireExistant) },
       { path: 'contrats/:id',     loadComponent: () => import('./pages/contrats/contrat-detail').then(m => m.ContratDetail) },
       { path: 'loyers',           loadComponent: () => import('./pages/loyers/loyers').then(m => m.Loyers) },
       { path: 'reclamations',     loadComponent: () => import('./pages/reclamations/reclamations').then(m => m.Reclamations) },

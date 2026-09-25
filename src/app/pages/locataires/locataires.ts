@@ -11,7 +11,12 @@ import { AuthService } from '../../core/auth.service';
   template: `
     <div class="head">
       <h1 class="ptitle">Locataires</h1>
-      @if (admin()) { <a class="btn-add" routerLink="/app/contrats/nouveau">+ Nouveau contrat / locataire</a> }
+      @if (admin()) {
+        <div class="actions">
+          <a class="btn-add" routerLink="/app/contrats/nouveau">+ Nouveau contrat / locataire</a>
+          <a class="btn-add sec" routerLink="/app/contrats/deja-present">+ Locataire déjà en place</a>
+        </div>
+      }
     </div>
     <input class="input search" placeholder="Rechercher par nom..." [(ngModel)]="q" />
     @if (loading()) { <p class="muted">Chargement...</p> }
@@ -30,9 +35,11 @@ import { AuthService } from '../../core/auth.service';
     }
   `,
   styles: [`
-    .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+    .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:10px}
     .ptitle{color:var(--ink);margin:0}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
     .btn-add{background:var(--gold);color:var(--ink);border-radius:10px;padding:10px 16px;font-weight:700;font-size:13px;text-decoration:none}
+    .btn-add.sec{background:#fff;border:1px solid var(--gold)}
     .search{margin-bottom:14px;max-width:420px}
     .muted{color:var(--muted)}
     .row{display:flex;align-items:center;gap:12px;margin-bottom:10px;cursor:pointer}

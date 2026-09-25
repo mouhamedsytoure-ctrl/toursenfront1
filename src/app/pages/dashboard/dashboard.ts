@@ -44,22 +44,18 @@ export class Dashboard implements OnInit {
       this.d.set(stats);
       this.immeubles.set((immeubles as any[]).slice(0, 6));
 
-      // contrats qui expirent dans <= 60 jours (actifs)
       const exp = (contrats as any[])
         .map(c => ({ ...c, j: this.jours(c) }))
         .filter(c => c.statut === 'actif' && c.j !== null && c.j <= 60)
         .sort((a, b) => a.j - b.j);
       this.expirent.set(exp);
 
-      // derniers paiements payes
       this.paiements.set((paiements as any[]).filter(p => p.statut === 'paye').slice(0, 6));
 
-      // reclamations recentes (non resolues d'abord)
       this.reclamations.set((recs as any[])
         .sort((a, b) => (a.statut === 'resolu' ? 1 : 0) - (b.statut === 'resolu' ? 1 : 0))
         .slice(0, 6));
 
-      // locataires en retard ce mois
       const payeIds = new Set((paiements as any[])
         .filter(p => p.periode === this.periode && p.statut === 'paye')
         .map(p => p.user_id ?? p.contrat?.user_id));

@@ -123,7 +123,6 @@ export class Loyers implements OnInit {
     this.loading.set(true);
     try {
       const [locs, pays]: any = await Promise.all([this.api.get('/locataires'), this.api.get('/paiements')]);
-      // Un seul paiement par contrat et par periode (contrainte unique cote back).
       const paiementsDeLaPeriode = new Map<number, any>(
         (pays as any[])
           .filter(p => p.periode === this.periode)
@@ -132,18 +131,12 @@ export class Loyers implements OnInit {
       const rows = (locs as any[]).map(l => {
         const c = (l.contrats || [])[0]; const lg = c?.logement; const im = lg?.immeuble;
         const paiement = c ? paiementsDeLaPeriode.get(c.id) : null;
-        // Le mois d'entree est deja couvert par la caution versee a la
-        // signature : jamais signale comme impaye.
         const premierMois = !!c?.date_debut && String(c.date_debut).slice(0, 7) === this.periode;
         return {
           id: l.id, name: l.name, loyer: c?.montant_loyer || 0,
           logement: lg ? `${im?.nom || ''} - ${lg.reference || ''}` : '—',
           contratId: c?.id ?? null,
           paiementId: paiement?.id ?? null,
-          // Statut reel : seul un vrai paiement confirme compte comme "Paye".
-          // Le mois d'entree n'affiche plus d'alerte, mais n'empeche plus
-          // d'enregistrer un paiement si vous le souhaitez (utile pour tester,
-          // ou si l'agence veut quand meme tracer ce premier versement).
           paye: paiement?.statut === 'paye',
           premierMois,
           recuEnvoye: !!paiement?.recu_envoye_at,

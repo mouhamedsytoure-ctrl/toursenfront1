@@ -216,10 +216,7 @@ export class NouveauContrat implements OnInit {
     this.submitted = true;
     this.error.set(null);
     if (!this.chambre) { this.error.set('Choisissez un logement.'); return; }
-    // Seul l'essentiel est obligatoire (identique a ce que le serveur exige) :
-    // le reste (civilite, telephone, adresse, profession, piece d'identite...)
-    // reste remplissable mais optionnel, utile pour aller vite avec un
-    // locataire deja en place dont on ressaisit juste le contrat existant.
+    // le reste (civilite, telephone, adresse...) est optionnel, meme regle que le serveur
     const manquants = [];
     if (!this.f.preneur_nom) manquants.push('Nom');
     if (!this.f.preneur_email) manquants.push('Email');

@@ -103,7 +103,6 @@ export class Immeubles implements OnInit {
     try {
       const im: any = await this.api.post('/immeubles', { nom: this.nNom, ville: this.nVille, adresse: this.nAdresse, description: this.nDesc });
       this.modal.set(false);
-      // aller direct sur la page de l'immeuble pour ajouter les photos / appartements
       this.router.navigate(['/app/immeubles', im.id]);
     } catch (e: any) { this.err2.set(e?.error?.message || 'Création impossible.'); }
     finally { this.busy.set(false); }

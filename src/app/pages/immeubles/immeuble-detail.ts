@@ -210,7 +210,6 @@ export class ImmeubleDetail implements OnInit {
     try {
       const id = this.route.snapshot.paramMap.get('id');
       this.im.set(await this.api.get('/immeubles/' + id));
-      // si une galerie est ouverte, la rafraichir
       if (this._galId != null) {
         const l = (this.im()?.logements || []).find((x: any) => x.id === this._galId);
         if (l) this.gallery.set(this.lgPhotos(l));
@@ -261,7 +260,7 @@ export class ImmeubleDetail implements OnInit {
   async upload(file: File, type: string, id: number) {
     this.up.set(true); this.prog.set('');
     try {
-      // une vidéo d'immeuble REMPLACE l'ancienne
+      // une seule video par immeuble, l'ancienne saute
       if (type === 'immeuble' && file.type.startsWith('video')) {
         const olds = (this.im()?.medias || []).filter((x: any) => x.type === 'video');
         for (const o of olds) { try { await firstValueFrom(this.http.delete(environment.apiUrl + '/medias/' + o.id)); } catch {} }

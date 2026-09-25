@@ -4,15 +4,12 @@ import { adminGuard, locataireGuard } from './core/role.guard';
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.Login) },
 
-  // Vitrine publique (visiteurs, sans connexion)
   { path: 'vitrine',     loadComponent: () => import('./pages/vitrine/vitrine').then(m => m.Vitrine) },
   { path: 'vitrine/:id', loadComponent: () => import('./pages/vitrine/vitrine-detail').then(m => m.VitrineDetail) },
   { path: 'apropos',     loadComponent: () => import('./pages/apropos/apropos').then(m => m.Apropos) },
 
-  // Espace locataire (responsive : ordinateur ET telephone, iPhone inclus)
   { path: 'espace', canActivate: [locataireGuard], loadComponent: () => import('./pages/espace/espace').then(m => m.Espace) },
 
-  // Espace de gestion (admin / super admin uniquement)
   {
     path: 'app',
     canActivate: [adminGuard],

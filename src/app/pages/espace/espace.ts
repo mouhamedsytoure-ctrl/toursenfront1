@@ -225,7 +225,7 @@ export class Espace implements OnInit {
   constructor(private api: Api, private http: HttpClient, public auth: AuthService, private route: ActivatedRoute) {}
 
   async ngOnInit() {
-    // Lien profond depuis l'email "votre reçu est disponible" : ?tab=paiements&paiement=123
+    // vient du lien dans l'email de recu : ?tab=paiements&paiement=123
     const qp = this.route.snapshot.queryParamMap;
     const paiementId = qp.get('paiement');
     if (paiementId) {

@@ -75,7 +75,6 @@ export class Reclamations implements OnInit {
     this.loading.set(true);
     try {
       const data = await this.api.get('/reclamations');
-      // priorite la plus haute d'abord, puis les plus recentes
       (data as any[]).sort((a, b) => this.prioRank(b.priorite) - this.prioRank(a.priorite));
       this.items.set(data);
     } finally { this.loading.set(false); }

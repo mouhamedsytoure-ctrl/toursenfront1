@@ -20,6 +20,21 @@ import { SignaturePad } from '../../shared/signature-pad';
       <div class="me">{{ auth.user()?.name }} <button class="lo" (click)="logout()">Déconnexion</button></div>
     </header>
 
+    @if (!loading() && signatureObligatoire()) {
+      <div class="wrap">
+        <div class="signgate">
+          <h1 class="ptitle">Signez votre contrat</h1>
+          <p class="muted">Votre agence a signé votre contrat de location. Il ne manque plus que votre
+            signature pour le finaliser — signez ci-dessous avec le doigt ou la souris. Vous recevrez
+            ensuite le contrat complet par email, et pourrez accéder au reste de votre espace.</p>
+          <div class="card">
+            <app-signature-pad (signed)="signerContrat($event)"/>
+            @if (signatureErreur()) { <div class="err">{{ signatureErreur() }}</div> }
+          </div>
+        </div>
+      </div>
+    } @else {
+
     <nav class="tabs">
       <button [class.on]="tab()==='accueil'" (click)="tab.set('accueil')">Accueil</button>
       <button [class.on]="tab()==='contrat'" (click)="tab.set('contrat')">Contrat</button>
@@ -119,10 +134,6 @@ import { SignaturePad } from '../../shared/signature-pad';
             <h3>Signature</h3>
             @if (!contrat().signature_bailleur) {
               <p class="muted">Votre contrat n'est pas encore prêt à signer (en attente de l'agence).</p>
-            } @else if (!contrat().signature_preneur) {
-              <p class="muted">Votre agence a signé ce contrat. Signez ci-dessous pour le valider définitivement.</p>
-              <app-signature-pad (signed)="signerContrat($event)"/>
-              @if (signatureErreur()) { <div class="err">{{ signatureErreur() }}</div> }
             } @else {
               <p class="muted">✓ Contrat entièrement signé, par vous et par l'agence.</p>
             }
@@ -174,6 +185,7 @@ import { SignaturePad } from '../../shared/signature-pad';
         }
       }
     </div>
+    }
   `,
   styles: [`
     :host{display:block;min-height:100vh;background:var(--bg)}
@@ -186,6 +198,8 @@ import { SignaturePad } from '../../shared/signature-pad';
     .tabs button.on{background:var(--gold);color:var(--ink);font-weight:700}
     .wrap{max-width:760px;margin:0 auto;padding:18px 16px}
     .muted{color:var(--muted)}
+    .signgate{padding-top:12px}
+    .ptitle{color:var(--ink);margin:0 0 10px}
     .hero{background:linear-gradient(135deg,var(--ink),var(--ink2,#244039));color:#fff;border-radius:18px;padding:22px}
     .h-lbl{opacity:.8} .h-val{font-size:30px;font-weight:bold} .h-val span{font-size:16px;opacity:.8}
     .statut{display:inline-block;margin-top:12px;padding:6px 14px;border-radius:99px;font-weight:700}
@@ -259,6 +273,10 @@ export class Espace implements OnInit {
   contrat() { return this._contrat(); }
   paiements() { return this._paiements(); }
   paye() { return this._paye(); }
+  signatureObligatoire() {
+    const c = this._contrat();
+    return !!c && !!c.signature_bailleur && !c.signature_preneur;
+  }
 
   async charger() {
     this.loading.set(true);

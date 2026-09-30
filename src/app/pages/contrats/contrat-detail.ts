@@ -7,11 +7,12 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Api, fcfa } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
+import { SignaturePad } from '../../shared/signature-pad';
 
 @Component({
   selector: 'app-contrat-detail',
   standalone: true,
-  imports: [RouterLink, SlicePipe, FormsModule],
+  imports: [RouterLink, SlicePipe, FormsModule, SignaturePad],
   template: `
     <a routerLink="/app/contrats" class="back">← Contrats</a>
     @if (loading()) { <p class="muted">Chargement...</p> }
@@ -43,6 +44,26 @@ import { AuthService } from '../../core/auth.service';
 
       @if (piece(); as p) { <h3>Pièce d'identité</h3> <img class="doc" [src]="p" alt=""/> }
       @if (sign(); as s) { <h3>Signature</h3> <img class="sig" [src]="s" alt=""/> }
+
+      <h3>Signature électronique du contrat</h3>
+      <div class="card">
+        @if (!ct.signature_bailleur) {
+          <p class="muted">Ce contrat n'a pas encore été signé par l'agence. Signez ci-dessous pour
+            envoyer le contrat et les identifiants de connexion au locataire.</p>
+          <app-signature-pad (signed)="signerBailleur($event)"/>
+          @if (signatureErreur()) { <div class="err">{{ signatureErreur() }}</div> }
+        } @else if (!ct.signature_preneur) {
+          <p class="muted">✓ Signé par l'agence le {{ ct.signe_bailleur_le | slice:0:16 }}.
+            En attente de la signature du locataire depuis son espace.</p>
+          <img class="sig" [src]="ct.signature_bailleur" alt="Signature de l'agence"/>
+        } @else {
+          <p class="muted">✓ Contrat entièrement signé.</p>
+          <div class="grid2">
+            <div><span>Agence — {{ ct.signe_bailleur_le | slice:0:16 }}</span><img class="sig" [src]="ct.signature_bailleur" alt=""/></div>
+            <div><span>Locataire — {{ ct.signe_preneur_le | slice:0:16 }}</span><img class="sig" [src]="ct.signature_preneur" alt=""/></div>
+          </div>
+        }
+      </div>
 
       @if (!ct.archived_at) {
         <h3>Gestion</h3>
@@ -152,6 +173,8 @@ export class ContratDetail implements OnInit {
   renouvLoyer: number | null = null;
   renouvCaution: number | null = null;
 
+  signatureErreur = signal<string | null>(null);
+
   constructor(private api: Api, private route: ActivatedRoute, private http: HttpClient, private auth: AuthService) {}
   async ngOnInit() { await this.load(); }
   estSuperAdmin() { return this.auth.role() === 'super_admin'; }
@@ -214,6 +237,15 @@ export class ContratDetail implements OnInit {
     if (!confirm(msg)) return;
     await this.api.put('/contrats/' + this.c().id + '/' + chemin, {});
     await this.load();
+  }
+  async signerBailleur(signature: string) {
+    this.signatureErreur.set(null);
+    try {
+      await this.api.post('/contrats/' + this.c().id + '/signer', { role: 'bailleur', signature });
+      await this.load();
+    } catch (e: any) {
+      this.signatureErreur.set(e?.error?.message || "Impossible d'enregistrer la signature.");
+    }
   }
   nom(c: any) { return `${c.preneur_prenom || ''} ${c.preneur_nom || ''}`.trim() || 'Contrat'; }
   logement(c: any) { const lg = c.logement; const im = lg?.immeuble; return lg ? `${im?.nom || ''} - ${lg.reference || ''}` : '—'; }

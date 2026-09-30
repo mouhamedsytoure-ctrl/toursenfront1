@@ -2,11 +2,12 @@ import { Component, signal, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Api } from '../../core/api.service';
+import { SignaturePad } from '../../shared/signature-pad';
 
 @Component({
   selector: 'app-nouveau-contrat',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, SignaturePad],
   template: `
     <a (click)="back()" class="back">← Contrats</a>
     <h1 class="ptitle">Nouveau contrat / locataire</h1>
@@ -123,17 +124,29 @@ import { Api } from '../../core/api.service';
     @if (error()) { <div class="err">{{ error() }}</div> }
     @if (emailConnexion()) {
       <div class="ok">
-        Compte créé.
-        @if (emailEnvoye()) {
-          Un email de bienvenue va être envoyé à {{ f.preneur_email }} (sous quelques minutes).
-        } @else {
-          <b>⚠ L'email de bienvenue n'a pas pu être mis en attente d'envoi</b> (à communiquer vous-même pour l'instant).
-        }
-        <br/>
+        Compte créé.<br/>
         Identifiant de connexion : <b>{{ emailConnexion() }}</b><br/>
         @if (motDePasse()) { Mot de passe : <b>{{ motDePasse() }}</b> }
       </div>
-      <button class="btn btn-ink full" (click)="continuer()">Continuer</button>
+
+      @if (!signatureFaite()) {
+        <div class="card">
+          <h3>Signature de l'agence</h3>
+          <p class="hint">Signez ci-dessous en tant que bailleur (SITS SUARL). Une fois signé, le contrat
+            et les identifiants de connexion seront envoyés par email à {{ f.preneur_email }}.</p>
+          <app-signature-pad (signed)="signerBailleur($event)"/>
+          @if (signatureErreur()) { <div class="err">{{ signatureErreur() }}</div> }
+        </div>
+      } @else {
+        <div class="ok">
+          @if (emailEnvoye()) {
+            ✓ Contrat signé par l'agence. Email envoyé à {{ f.preneur_email }} (sous quelques minutes).
+          } @else {
+            ✓ Contrat signé par l'agence. <b>⚠ L'email n'a pas pu être envoyé</b>, à communiquer vous-même pour l'instant.
+          }
+        </div>
+        <button class="btn btn-ink full" (click)="continuer()">Continuer</button>
+      }
     } @else {
       <button class="btn btn-ink full" [disabled]="saving()" (click)="save()">
         {{ saving() ? 'Création...' : 'Créer le contrat' }}
@@ -169,7 +182,9 @@ export class NouveauContrat implements OnInit {
   error = signal<string | null>(null);
   motDePasse = signal<string | null>(null);
   emailConnexion = signal<string | null>(null);
-  emailEnvoye = signal(true);
+  emailEnvoye = signal(false);
+  signatureFaite = signal(false);
+  signatureErreur = signal<string | null>(null);
   contratCreeId: number | null = null;
   submitted = false;
 
@@ -240,12 +255,26 @@ export class NouveauContrat implements OnInit {
       const res: any = await this.api.post('/contrats', body);
       this.contratCreeId = res.contrat.id;
       if (res?.mot_de_passe) { this.motDePasse.set(res.mot_de_passe); }
-      this.emailEnvoye.set(res?.email_envoye !== false);
       this.emailConnexion.set(res?.email_connexion || null);
       if (!res?.email_connexion) { this.router.navigate(['/app/contrats', res.contrat.id]); }
     } catch (e: any) {
       this.error.set(e?.error?.message || e?.error?.errors?.preneur_email?.[0] || 'Erreur lors de la création.');
     } finally { this.saving.set(false); }
+  }
+
+  async signerBailleur(signature: string) {
+    this.signatureErreur.set(null);
+    try {
+      const res: any = await this.api.post(`/contrats/${this.contratCreeId}/signer`, {
+        role: 'bailleur',
+        signature,
+        mot_de_passe: this.motDePasse() || 'passer',
+      });
+      this.signatureFaite.set(true);
+      this.emailEnvoye.set(res?.email_envoye !== false);
+    } catch (e: any) {
+      this.signatureErreur.set(e?.error?.message || "Impossible d'enregistrer la signature.");
+    }
   }
 
   continuer() {

@@ -8,11 +8,12 @@ import { environment } from '../../../environments/environment';
 import { Api, fcfa } from '../../core/api.service';
 import { AuthService } from '../../core/auth.service';
 import { Profil } from '../profil/profil';
+import { SignaturePad } from '../../shared/signature-pad';
 
 @Component({
   selector: 'app-espace',
   standalone: true,
-  imports: [FormsModule, SlicePipe, Profil],
+  imports: [FormsModule, SlicePipe, Profil, SignaturePad],
   template: `
     <header class="top">
       <a class="brandbox" (click)="apropos()"><img [src]="logo" alt="SITS"/></a>
@@ -113,6 +114,19 @@ import { Profil } from '../profil/profil';
             <div class="row"><span>Échéance</span><b>le {{ contrat().jour_echeance }} de chaque mois</b></div>
             <button class="btn btn-ink full" [disabled]="busy()" (click)="pdfContrat()">📄 Télécharger mon contrat (PDF)</button>
           </div>
+
+          <div class="card">
+            <h3>Signature</h3>
+            @if (!contrat().signature_bailleur) {
+              <p class="muted">Votre contrat n'est pas encore prêt à signer (en attente de l'agence).</p>
+            } @else if (!contrat().signature_preneur) {
+              <p class="muted">Votre agence a signé ce contrat. Signez ci-dessous pour le valider définitivement.</p>
+              <app-signature-pad (signed)="signerContrat($event)"/>
+              @if (signatureErreur()) { <div class="err">{{ signatureErreur() }}</div> }
+            } @else {
+              <p class="muted">✓ Contrat entièrement signé, par vous et par l'agence.</p>
+            }
+          </div>
         }
 
         <!-- PAIEMENTS -->
@@ -188,6 +202,7 @@ import { Profil } from '../profil/profil';
     .mode{flex:1;padding:14px;border:2px solid var(--line);background:#f5f5f5;border-radius:12px;font-weight:700;color:var(--muted);cursor:not-allowed;display:flex;flex-direction:column;align-items:center;gap:4px}
     .mode .soon{font-size:11px;font-weight:600;color:var(--muted);background:#fff;border:1px solid var(--line);border-radius:99px;padding:2px 8px}
     .ok{background:#E7F1EC;color:var(--ok);padding:12px;border-radius:12px;margin-top:12px}
+    .err{color:var(--bad);margin-top:8px;font-size:13px}
     .badge{background:var(--bg);border:1px solid var(--line);border-radius:99px;padding:3px 10px;font-size:12px;color:var(--ink)}
     textarea.input{resize:vertical}
     .payblock.cible{background:#FFF8E9;border:1px solid var(--gold);border-radius:12px;padding:0 10px;margin:0 -10px}
@@ -224,6 +239,7 @@ export class Espace implements OnInit {
   rObjet = ''; rDesc = ''; rPrio = 'normale';
   fcfa = fcfa;
   recuCible = signal<number | null>(null);
+  signatureErreur = signal<string | null>(null);
 
   constructor(private api: Api, private http: HttpClient, public auth: AuthService, private route: ActivatedRoute) {}
 
@@ -255,6 +271,16 @@ export class Espace implements OnInit {
     } finally { this.loading.set(false); }
   }
   async chargerReclams() { try { this.reclams.set(await this.api.get('/reclamations')); } catch {} }
+
+  async signerContrat(signature: string) {
+    this.signatureErreur.set(null);
+    try {
+      await this.api.post('/contrats/' + this.contrat().id + '/signer', { role: 'preneur', signature });
+      await this.charger();
+    } catch (e: any) {
+      this.signatureErreur.set(e?.error?.message || "Impossible d'enregistrer la signature.");
+    }
+  }
 
   totalPaye() { return this._paiements().filter(p => p.statut === 'paye').reduce((s, p) => s + Number(p.montant || 0), 0); }
   moisRestants() {

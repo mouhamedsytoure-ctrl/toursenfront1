@@ -134,6 +134,7 @@ import { SignaturePad } from '../../shared/signature-pad';
           <h3>Signature de l'agence</h3>
           <p class="hint">Signez ci-dessous en tant que bailleur (SITS SUARL). Une fois signé, le contrat
             et les identifiants de connexion seront envoyés par email à {{ f.preneur_email }}.</p>
+          <label class="chk"><input type="checkbox" [(ngModel)]="enregistrerParDefaut"/> Enregistrer comme signature par défaut de l'agence (ne plus redemander pour les prochains contrats)</label>
           <app-signature-pad (signed)="signerBailleur($event)"/>
           @if (signatureErreur()) { <div class="err">{{ signatureErreur() }}</div> }
         </div>
@@ -170,6 +171,8 @@ import { SignaturePad } from '../../shared/signature-pad';
     .flabel{display:block;font-size:12px;color:var(--muted);font-weight:600;margin:8px 0 4px}
     .req{color:var(--bad)}
     .inp-err{border-color:var(--bad)!important;background:#fff8f8}
+    .chk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:10px}
+    .chk input{width:auto}
   `],
 })
 export class NouveauContrat implements OnInit {
@@ -185,6 +188,7 @@ export class NouveauContrat implements OnInit {
   emailEnvoye = signal(false);
   signatureFaite = signal(false);
   signatureErreur = signal<string | null>(null);
+  enregistrerParDefaut = true;
   contratCreeId: number | null = null;
   submitted = false;
 
@@ -256,6 +260,11 @@ export class NouveauContrat implements OnInit {
       this.contratCreeId = res.contrat.id;
       if (res?.mot_de_passe) { this.motDePasse.set(res.mot_de_passe); }
       this.emailConnexion.set(res?.email_connexion || null);
+      if (res?.contrat?.signature_bailleur) {
+        // signature d'agence par defaut deja appliquee cote serveur, rien a signer
+        this.signatureFaite.set(true);
+        this.emailEnvoye.set(res?.email_envoye !== false);
+      }
       if (!res?.email_connexion) { this.router.navigate(['/app/contrats', res.contrat.id]); }
     } catch (e: any) {
       this.error.set(e?.error?.message || e?.error?.errors?.preneur_email?.[0] || 'Erreur lors de la création.');
@@ -269,6 +278,7 @@ export class NouveauContrat implements OnInit {
         role: 'bailleur',
         signature,
         mot_de_passe: this.motDePasse() || 'passer',
+        enregistrer_defaut: this.enregistrerParDefaut,
       });
       this.signatureFaite.set(true);
       this.emailEnvoye.set(res?.email_envoye !== false);

@@ -50,6 +50,7 @@ import { SignaturePad } from '../../shared/signature-pad';
         @if (!ct.signature_bailleur) {
           <p class="muted">Ce contrat n'a pas encore été signé par l'agence. Signez ci-dessous pour
             envoyer le contrat et les identifiants de connexion au locataire.</p>
+          <label class="chk"><input type="checkbox" [(ngModel)]="enregistrerParDefaut"/> Enregistrer comme signature par défaut de l'agence</label>
           <app-signature-pad (signed)="signerBailleur($event)"/>
           @if (signatureErreur()) { <div class="err">{{ signatureErreur() }}</div> }
         } @else if (!ct.signature_preneur) {
@@ -165,6 +166,8 @@ import { SignaturePad } from '../../shared/signature-pad';
     .ok{color:var(--ok);margin:10px 0;background:#E7F1EC;padding:10px;border-radius:10px;font-size:13.5px}
     .req{color:var(--bad)}
     .err{color:var(--bad);margin:8px 0;font-size:13px}
+    .chk{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-bottom:10px}
+    .chk input{width:auto}
   `],
 })
 export class ContratDetail implements OnInit {
@@ -186,6 +189,7 @@ export class ContratDetail implements OnInit {
   renouvCaution: number | null = null;
 
   signatureErreur = signal<string | null>(null);
+  enregistrerParDefaut = true;
 
   supprimerBusy = signal(false);
   supprimerErreur = signal<string | null>(null);
@@ -268,7 +272,9 @@ export class ContratDetail implements OnInit {
   async signerBailleur(signature: string) {
     this.signatureErreur.set(null);
     try {
-      await this.api.post('/contrats/' + this.c().id + '/signer', { role: 'bailleur', signature });
+      await this.api.post('/contrats/' + this.c().id + '/signer', {
+        role: 'bailleur', signature, enregistrer_defaut: this.enregistrerParDefaut,
+      });
       await this.load();
     } catch (e: any) {
       this.signatureErreur.set(e?.error?.message || "Impossible d'enregistrer la signature.");

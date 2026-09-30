@@ -55,11 +55,18 @@ import { SignaturePad } from '../../shared/signature-pad';
           @if (signatureErreur()) { <div class="err">{{ signatureErreur() }}</div> }
         } @else if (!ct.signature_preneur) {
           <p class="muted">✓ Signé par l'agence le {{ ct.signe_bailleur_le | slice:0:16 }}.
-            Si le locataire est présent, faites-le signer ci-dessous — sinon il pourra le faire plus
-            tard depuis son espace.</p>
+            Si le locataire est présent, faites-le signer ci-dessous.</p>
           <img class="sig" [src]="ct.signature_bailleur" alt="Signature de l'agence"/>
           <app-signature-pad (signed)="signerPreneur($event)"/>
           @if (signatureErreur()) { <div class="err">{{ signatureErreur() }}</div> }
+          <p class="muted" style="margin-top:10px">Absent ? Envoyez-lui ses identifiants par email pour qu'il
+            signe plus tard depuis chez lui.</p>
+          @if (ct.email_invitation_envoye_le) {
+            <p class="muted">✓ Déjà envoyé le {{ ct.email_invitation_envoye_le | slice:0:16 }}.</p>
+          }
+          <button class="btn ghost" [disabled]="invitationBusy()" (click)="envoyerInvitation()">
+            {{ invitationBusy() ? 'Envoi...' : (ct.email_invitation_envoye_le ? 'Renvoyer par email' : 'Envoyer ses identifiants par email') }}
+          </button>
         } @else {
           <p class="muted">✓ Contrat entièrement signé.</p>
           <div class="grid2">
@@ -193,6 +200,7 @@ export class ContratDetail implements OnInit {
 
   signatureErreur = signal<string | null>(null);
   enregistrerParDefaut = true;
+  invitationBusy = signal(false);
 
   supprimerBusy = signal(false);
   supprimerErreur = signal<string | null>(null);
@@ -291,6 +299,16 @@ export class ContratDetail implements OnInit {
     } catch (e: any) {
       this.signatureErreur.set(e?.error?.message || "Impossible d'enregistrer la signature.");
     }
+  }
+  async envoyerInvitation() {
+    this.invitationBusy.set(true);
+    this.signatureErreur.set(null);
+    try {
+      await this.api.post('/contrats/' + this.c().id + '/envoyer-invitation-signature', {});
+      await this.load();
+    } catch (e: any) {
+      this.signatureErreur.set(e?.error?.message || "Impossible d'envoyer l'email.");
+    } finally { this.invitationBusy.set(false); }
   }
   nom(c: any) { return `${c.preneur_prenom || ''} ${c.preneur_nom || ''}`.trim() || 'Contrat'; }
   logement(c: any) { const lg = c.logement; const im = lg?.immeuble; return lg ? `${im?.nom || ''} - ${lg.reference || ''}` : '—'; }

@@ -147,12 +147,20 @@ import { SignaturePad } from '../../shared/signature-pad';
         <div class="card">
           <h3>Signature du locataire</h3>
           <p class="hint">S'il est présent maintenant, faites-le signer directement ci-dessous — le mail
-            partira aussitôt, avec le contrat entièrement signé. Sinon, passez : il pourra signer plus
-            tard depuis son espace, et le mail partira à ce moment-là.</p>
+            partira aussitôt, avec le contrat entièrement signé.</p>
           <app-signature-pad (signed)="signerPreneurSurPlace($event)"/>
           @if (signatureErreur()) { <div class="err">{{ signatureErreur() }}</div> }
+          <p class="hint" style="margin-top:14px">Absent ? Envoyez-lui ses identifiants par email pour qu'il
+            signe plus tard depuis chez lui — le contrat complet lui sera envoyé une fois qu'il aura signé.</p>
+          @if (invitationEnvoyee()) {
+            <div class="ok">✓ Email envoyé.</div>
+          } @else {
+            <button class="btn ghost full" [disabled]="invitationBusy()" (click)="envoyerInvitation()">
+              {{ invitationBusy() ? 'Envoi...' : 'Envoyer ses identifiants par email' }}
+            </button>
+          }
         </div>
-        <button class="btn ghost full" (click)="continuer()">Passer — il signera plus tard</button>
+        <button class="btn btn-ink full" (click)="continuer()">Continuer</button>
       }
     } @else {
       <button class="btn btn-ink full" [disabled]="saving()" (click)="save()">
@@ -196,6 +204,8 @@ export class NouveauContrat implements OnInit {
   signatureFaite = signal(false);
   signatureErreur = signal<string | null>(null);
   enregistrerParDefaut = true;
+  invitationBusy = signal(false);
+  invitationEnvoyee = signal(false);
   contratCreeId: number | null = null;
   submitted = false;
 
@@ -301,6 +311,17 @@ export class NouveauContrat implements OnInit {
     } catch (e: any) {
       this.signatureErreur.set(e?.error?.message || "Impossible d'enregistrer la signature.");
     }
+  }
+
+  async envoyerInvitation() {
+    this.invitationBusy.set(true);
+    this.signatureErreur.set(null);
+    try {
+      await this.api.post(`/contrats/${this.contratCreeId}/envoyer-invitation-signature`, {});
+      this.invitationEnvoyee.set(true);
+    } catch (e: any) {
+      this.signatureErreur.set(e?.error?.message || "Impossible d'envoyer l'email.");
+    } finally { this.invitationBusy.set(false); }
   }
 
   continuer() {

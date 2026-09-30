@@ -132,21 +132,27 @@ import { SignaturePad } from '../../shared/signature-pad';
       @if (!signatureFaite()) {
         <div class="card">
           <h3>Signature de l'agence</h3>
-          <p class="hint">Signez ci-dessous en tant que bailleur (SITS SUARL). Une fois signé, le contrat
-            et les identifiants de connexion seront envoyés par email à {{ f.preneur_email }}.</p>
+          <p class="hint">Signez ci-dessous en tant que bailleur (SITS SUARL). Le mail (contrat + identifiants)
+            ne partira qu'une fois le locataire signé lui aussi — idéal si vous signez ensemble maintenant :
+            faites-lui saisir ses identifiants sur cet appareil et signer tout de suite, dans l'onglet Contrat.</p>
           <label class="chk"><input type="checkbox" [(ngModel)]="enregistrerParDefaut"/> Enregistrer comme signature par défaut de l'agence (ne plus redemander pour les prochains contrats)</label>
           <app-signature-pad (signed)="signerBailleur($event)"/>
           @if (signatureErreur()) { <div class="err">{{ signatureErreur() }}</div> }
         </div>
-      } @else {
-        <div class="ok">
-          @if (emailEnvoye()) {
-            ✓ Contrat signé par l'agence. Email envoyé à {{ f.preneur_email }} (sous quelques minutes).
-          } @else {
-            ✓ Contrat signé par l'agence. <b>⚠ L'email n'a pas pu être envoyé</b>, à communiquer vous-même pour l'instant.
-          }
-        </div>
+      } @else if (emailEnvoye()) {
+        <div class="ok">✓ Contrat entièrement signé. Email envoyé à {{ f.preneur_email }} (sous quelques minutes).</div>
         <button class="btn btn-ink full" (click)="continuer()">Continuer</button>
+      } @else {
+        <div class="ok">✓ Contrat signé par l'agence.</div>
+        <div class="card">
+          <h3>Signature du locataire</h3>
+          <p class="hint">S'il est présent maintenant, faites-le signer directement ci-dessous — le mail
+            partira aussitôt, avec le contrat entièrement signé. Sinon, passez : il pourra signer plus
+            tard depuis son espace, et le mail partira à ce moment-là.</p>
+          <app-signature-pad (signed)="signerPreneurSurPlace($event)"/>
+          @if (signatureErreur()) { <div class="err">{{ signatureErreur() }}</div> }
+        </div>
+        <button class="btn ghost full" (click)="continuer()">Passer — il signera plus tard</button>
       }
     } @else {
       <button class="btn btn-ink full" [disabled]="saving()" (click)="save()">
@@ -165,6 +171,7 @@ import { SignaturePad } from '../../shared/signature-pad';
     .full{width:100%;margin-top:6px}
     .err{color:var(--bad);margin:10px 0}
     .ok{color:var(--ok);margin:10px 0;background:#E7F1EC;padding:10px;border-radius:10px}
+    .ghost{background:#fff;border:1px solid var(--ink);color:var(--ink)}
     .note{color:var(--muted);font-size:12px;text-align:center;margin-top:8px}
     .hint{color:var(--muted);font-size:12px;margin:-6px 0 10px}
     .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
@@ -277,11 +284,20 @@ export class NouveauContrat implements OnInit {
       const res: any = await this.api.post(`/contrats/${this.contratCreeId}/signer`, {
         role: 'bailleur',
         signature,
-        mot_de_passe: this.motDePasse() || 'passer',
         enregistrer_defaut: this.enregistrerParDefaut,
       });
       this.signatureFaite.set(true);
-      this.emailEnvoye.set(res?.email_envoye !== false);
+      this.emailEnvoye.set(res?.email_envoye === true);
+    } catch (e: any) {
+      this.signatureErreur.set(e?.error?.message || "Impossible d'enregistrer la signature.");
+    }
+  }
+
+  async signerPreneurSurPlace(signature: string) {
+    this.signatureErreur.set(null);
+    try {
+      const res: any = await this.api.post(`/contrats/${this.contratCreeId}/signer`, { role: 'preneur', signature });
+      this.emailEnvoye.set(res?.email_envoye === true);
     } catch (e: any) {
       this.signatureErreur.set(e?.error?.message || "Impossible d'enregistrer la signature.");
     }

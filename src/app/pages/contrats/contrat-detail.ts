@@ -48,15 +48,18 @@ import { SignaturePad } from '../../shared/signature-pad';
       <h3>Signature électronique du contrat</h3>
       <div class="card">
         @if (!ct.signature_bailleur) {
-          <p class="muted">Ce contrat n'a pas encore été signé par l'agence. Signez ci-dessous pour
-            envoyer le contrat et les identifiants de connexion au locataire.</p>
+          <p class="muted">Ce contrat n'a pas encore été signé par l'agence. Le mail (contrat + identifiants)
+            ne partira qu'une fois les deux signatures posées.</p>
           <label class="chk"><input type="checkbox" [(ngModel)]="enregistrerParDefaut"/> Enregistrer comme signature par défaut de l'agence</label>
           <app-signature-pad (signed)="signerBailleur($event)"/>
           @if (signatureErreur()) { <div class="err">{{ signatureErreur() }}</div> }
         } @else if (!ct.signature_preneur) {
           <p class="muted">✓ Signé par l'agence le {{ ct.signe_bailleur_le | slice:0:16 }}.
-            En attente de la signature du locataire depuis son espace.</p>
+            Si le locataire est présent, faites-le signer ci-dessous — sinon il pourra le faire plus
+            tard depuis son espace.</p>
           <img class="sig" [src]="ct.signature_bailleur" alt="Signature de l'agence"/>
+          <app-signature-pad (signed)="signerPreneur($event)"/>
+          @if (signatureErreur()) { <div class="err">{{ signatureErreur() }}</div> }
         } @else {
           <p class="muted">✓ Contrat entièrement signé.</p>
           <div class="grid2">
@@ -275,6 +278,15 @@ export class ContratDetail implements OnInit {
       await this.api.post('/contrats/' + this.c().id + '/signer', {
         role: 'bailleur', signature, enregistrer_defaut: this.enregistrerParDefaut,
       });
+      await this.load();
+    } catch (e: any) {
+      this.signatureErreur.set(e?.error?.message || "Impossible d'enregistrer la signature.");
+    }
+  }
+  async signerPreneur(signature: string) {
+    this.signatureErreur.set(null);
+    try {
+      await this.api.post('/contrats/' + this.c().id + '/signer', { role: 'preneur', signature });
       await this.load();
     } catch (e: any) {
       this.signatureErreur.set(e?.error?.message || "Impossible d'enregistrer la signature.");

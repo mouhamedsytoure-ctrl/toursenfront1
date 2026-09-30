@@ -1,6 +1,6 @@
 import { SlicePipe } from '@angular/common';
 import { Component, signal, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -74,6 +74,17 @@ import { SignaturePad } from '../../shared/signature-pad';
         </div>
       }
 
+      @if (estSuperAdmin()) {
+        <h3>Zone dangereuse</h3>
+        <div class="card">
+          <p class="muted">Supprime définitivement ce contrat et le compte locataire associé (identifiant,
+            historique). Impossible si des loyers ont déjà été payés — dans ce cas, archivez plutôt.
+            Réservé aux erreurs de saisie ou contrats de test.</p>
+          @if (supprimerErreur()) { <div class="err">{{ supprimerErreur() }}</div> }
+          <button class="btn ghost danger" [disabled]="supprimerBusy()" (click)="supprimer()">Supprimer définitivement</button>
+        </div>
+      }
+
       @if (!ct.archived_at && ct.statut === 'actif') {
         <h3>Renouvellement</h3>
         <div class="card">
@@ -143,6 +154,7 @@ import { SignaturePad } from '../../shared/signature-pad';
     .grid2 div{display:flex;flex-direction:column} .grid2 span{color:var(--muted);font-size:12px} .grid2 b{color:var(--ink)}
     .actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
     .ghost{background:#fff;border:1px solid var(--ink);color:var(--ink)}
+    .ghost.danger{border-color:var(--bad);color:var(--bad)}
     h3{color:var(--ink);margin:18px 0 8px}
     .doc{max-width:340px;border-radius:12px;border:1px solid var(--line)}
     .sig{max-width:240px;background:#fff;border:1px solid var(--line);border-radius:8px}
@@ -175,7 +187,10 @@ export class ContratDetail implements OnInit {
 
   signatureErreur = signal<string | null>(null);
 
-  constructor(private api: Api, private route: ActivatedRoute, private http: HttpClient, private auth: AuthService) {}
+  supprimerBusy = signal(false);
+  supprimerErreur = signal<string | null>(null);
+
+  constructor(private api: Api, private route: ActivatedRoute, private http: HttpClient, private auth: AuthService, private router: Router) {}
   async ngOnInit() { await this.load(); }
   estSuperAdmin() { return this.auth.role() === 'super_admin'; }
   ouvrirRenouvellement(ct: any) {
@@ -237,6 +252,18 @@ export class ContratDetail implements OnInit {
     if (!confirm(msg)) return;
     await this.api.put('/contrats/' + this.c().id + '/' + chemin, {});
     await this.load();
+  }
+  async supprimer() {
+    const nom = this.nom(this.c());
+    if (!confirm(`Supprimer définitivement le contrat de ${nom} et son compte locataire ? Cette action est irréversible.`)) return;
+    this.supprimerBusy.set(true);
+    this.supprimerErreur.set(null);
+    try {
+      await this.api.del('/contrats/' + this.c().id);
+      this.router.navigate(['/app/contrats']);
+    } catch (e: any) {
+      this.supprimerErreur.set(e?.error?.message || 'Suppression impossible.');
+    } finally { this.supprimerBusy.set(false); }
   }
   async signerBailleur(signature: string) {
     this.signatureErreur.set(null);

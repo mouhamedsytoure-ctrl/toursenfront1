@@ -93,6 +93,14 @@ import { SignaturePad } from '../../shared/signature-pad';
             Réservé aux erreurs de saisie ou contrats de test.</p>
           @if (supprimerErreur()) { <div class="err">{{ supprimerErreur() }}</div> }
           <button class="btn ghost danger" [disabled]="supprimerBusy()" (click)="supprimer()">Supprimer définitivement</button>
+          @if (supprimerBloqueParPaiements()) {
+            <p class="muted" style="margin-top:12px">Ce contrat a des paiements enregistrés. Si c'est bien un
+              contrat de test (pas un vrai locataire), tu peux forcer la suppression — ça efface aussi ces
+              paiements, définitivement.</p>
+            <button class="btn ghost danger" [disabled]="supprimerBusy()" (click)="supprimer(true)">
+              Forcer (supprime aussi les paiements)
+            </button>
+          }
         </div>
       }
 
@@ -204,6 +212,7 @@ export class ContratDetail implements OnInit {
 
   supprimerBusy = signal(false);
   supprimerErreur = signal<string | null>(null);
+  supprimerBloqueParPaiements = signal(false);
 
   constructor(private api: Api, private route: ActivatedRoute, private http: HttpClient, private auth: AuthService, private router: Router) {}
   async ngOnInit() { await this.load(); }
@@ -268,16 +277,23 @@ export class ContratDetail implements OnInit {
     await this.api.put('/contrats/' + this.c().id + '/' + chemin, {});
     await this.load();
   }
-  async supprimer() {
+  async supprimer(avecPaiements = false) {
     const nom = this.nom(this.c());
-    if (!confirm(`Supprimer définitivement le contrat de ${nom} et son compte locataire ? Cette action est irréversible.`)) return;
+    const msg = avecPaiements
+      ? `Supprimer définitivement le contrat de ${nom}, son compte locataire ET ses paiements ? Irréversible.`
+      : `Supprimer définitivement le contrat de ${nom} et son compte locataire ? Cette action est irréversible.`;
+    if (!confirm(msg)) return;
     this.supprimerBusy.set(true);
     this.supprimerErreur.set(null);
+    this.supprimerBloqueParPaiements.set(false);
     try {
-      await this.api.del('/contrats/' + this.c().id);
+      await this.api.del('/contrats/' + this.c().id, avecPaiements ? { avec_paiements: true } : undefined);
       this.router.navigate(['/app/contrats']);
     } catch (e: any) {
       this.supprimerErreur.set(e?.error?.message || 'Suppression impossible.');
+      if (e?.status === 422 && /paiements/i.test(e?.error?.message || '')) {
+        this.supprimerBloqueParPaiements.set(true);
+      }
     } finally { this.supprimerBusy.set(false); }
   }
   async signerBailleur(signature: string) {

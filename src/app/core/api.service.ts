@@ -11,7 +11,7 @@ export class Api {
   get<T = any>(p: string) { return firstValueFrom(this.http.get<T>(this.url(p))); }
   post<T = any>(p: string, body: any) { return firstValueFrom(this.http.post<T>(this.url(p), body)); }
   put<T = any>(p: string, body: any) { return firstValueFrom(this.http.put<T>(this.url(p), body)); }
-  del<T = any>(p: string) { return firstValueFrom(this.http.delete<T>(this.url(p))); }
+  del<T = any>(p: string, body?: any) { return firstValueFrom(this.http.delete<T>(this.url(p), body ? { body } : undefined)); }
 }
 
 export function fcfa(v: any): string {

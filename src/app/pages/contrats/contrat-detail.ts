@@ -283,11 +283,13 @@ export class ContratDetail implements OnInit {
       ? `Supprimer définitivement le contrat de ${nom}, son compte locataire ET ses paiements ? Irréversible.`
       : `Supprimer définitivement le contrat de ${nom} et son compte locataire ? Cette action est irréversible.`;
     if (!confirm(msg)) return;
+    const code = prompt('Code de suppression :');
+    if (!code) return;
     this.supprimerBusy.set(true);
     this.supprimerErreur.set(null);
     this.supprimerBloqueParPaiements.set(false);
     try {
-      await this.api.del('/contrats/' + this.c().id, avecPaiements ? { avec_paiements: true } : undefined);
+      await this.api.del('/contrats/' + this.c().id, { code_suppression: code, ...(avecPaiements ? { avec_paiements: true } : {}) });
       this.router.navigate(['/app/contrats']);
     } catch (e: any) {
       this.supprimerErreur.set(e?.error?.message || 'Suppression impossible.');

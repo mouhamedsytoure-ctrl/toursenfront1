@@ -29,6 +29,21 @@ import { AuthService } from '../../core/auth.service';
       <button class="btn btn-ink" [disabled]="saving()" (click)="save()">
         {{ saving() ? 'Enregistrement...' : 'Enregistrer' }}
       </button>
+
+      @if (auth.role() === 'super_admin') {
+        <h3 class="ttl" style="margin-top:28px">Code de suppression</h3>
+        <p class="hint">Requis pour toute suppression définitive (contrat, logement, immeuble). Toi seul peux
+          le changer, en connaissant le code actuel.</p>
+        <label class="flabel">Code actuel</label>
+        <input class="input" type="password" [(ngModel)]="codeForm.ancien"/>
+        <label class="flabel">Nouveau code</label>
+        <input class="input" type="password" [(ngModel)]="codeForm.nouveau"/>
+        @if (codeErr()) { <div class="err">{{ codeErr() }}</div> }
+        @if (codeOk()) { <div class="ok">{{ codeOk() }}</div> }
+        <button class="btn btn-ink" [disabled]="codeSaving()" (click)="changerCode()">
+          {{ codeSaving() ? 'Enregistrement...' : 'Changer le code' }}
+        </button>
+      }
     </div>
   `,
   styles: [`
@@ -48,6 +63,11 @@ export class Profil implements OnInit {
   ok = signal<string | null>(null);
 
   f: any = { name: '', email: '', telephone: '', password: '', password_confirm: '' };
+
+  codeForm = { ancien: '', nouveau: '' };
+  codeSaving = signal(false);
+  codeErr = signal<string | null>(null);
+  codeOk = signal<string | null>(null);
 
   constructor(private api: Api, public auth: AuthService) {}
 
@@ -80,5 +100,23 @@ export class Profil implements OnInit {
     } catch (e: any) {
       this.error.set(e?.error?.message || e?.error?.errors?.email?.[0] || 'Erreur lors de la mise à jour.');
     } finally { this.saving.set(false); }
+  }
+
+  async changerCode() {
+    this.codeErr.set(null); this.codeOk.set(null);
+    if (!this.codeForm.ancien || !this.codeForm.nouveau) {
+      this.codeErr.set('Renseigne le code actuel et le nouveau.');
+      return;
+    }
+    this.codeSaving.set(true);
+    try {
+      await this.api.put('/code-suppression', {
+        ancien_code: this.codeForm.ancien, nouveau_code: this.codeForm.nouveau,
+      });
+      this.codeOk.set('Code de suppression mis à jour.');
+      this.codeForm = { ancien: '', nouveau: '' };
+    } catch (e: any) {
+      this.codeErr.set(e?.error?.message || 'Mise à jour impossible.');
+    } finally { this.codeSaving.set(false); }
   }
 }

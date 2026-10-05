@@ -258,9 +258,11 @@ export class ImmeubleDetail implements OnInit {
   async supprimerImmeuble(m: any) {
     this.errImmeuble.set(null);
     if (!confirm(`Supprimer définitivement l'immeuble "${m.nom}" et tous ses logements ? Impossible si un logement a un historique de contrat.`)) return;
+    const code = prompt('Code de suppression :');
+    if (!code) return;
     this.up.set(true);
     try {
-      await firstValueFrom(this.http.delete(environment.apiUrl + '/immeubles/' + m.id));
+      await firstValueFrom(this.http.delete(environment.apiUrl + '/immeubles/' + m.id, { body: { code_suppression: code } }));
       this.router.navigate(['/app/immeubles']);
     } catch (e: any) {
       this.errImmeuble.set(e?.error?.message || 'Suppression impossible.');
@@ -271,9 +273,11 @@ export class ImmeubleDetail implements OnInit {
   async supprimerLogement(l: any) {
     this.errLogement.set(null);
     if (!confirm(`Supprimer définitivement "${l.reference}" ? Impossible s'il a un historique de contrat.`)) return;
+    const code = prompt('Code de suppression :');
+    if (!code) return;
     this.up.set(true);
     try {
-      await firstValueFrom(this.http.delete(environment.apiUrl + '/logements/' + l.id));
+      await firstValueFrom(this.http.delete(environment.apiUrl + '/logements/' + l.id, { body: { code_suppression: code } }));
       await this.reload();
     } catch (e: any) {
       this.errLogement.set(e?.error?.message || 'Suppression impossible.');

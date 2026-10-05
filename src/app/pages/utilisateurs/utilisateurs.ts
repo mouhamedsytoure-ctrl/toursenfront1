@@ -16,8 +16,11 @@ import { Api } from '../../core/api.service';
           <div class="av">{{ ini(u.name) }}</div>
           <div class="info"><div class="nm">{{ u.name }}</div><div class="sub">{{ u.email }} · {{ u.telephone || '—' }}</div></div>
           <span class="badge" [style.background]="u.is_active ? '#E7F1EC':'#FBE3E0'" [style.color]="u.is_active ? 'var(--ok)':'var(--bad)'">{{ u.is_active ? 'Actif':'Inactif' }}</span>
+          <button class="btn ghost sm" [disabled]="busy()" (click)="togglerActif(u)">{{ u.is_active ? 'Désactiver' : 'Activer' }}</button>
+          <button class="btn ghost sm danger" [disabled]="busy()" (click)="supprimer(u)">Supprimer</button>
         </div>
       }
+      @if (erreur()) { <div class="e">{{ erreur() }}</div> }
     }
     @if (show()) {
       <div class="modal" (click)="show.set(false)">
@@ -44,10 +47,13 @@ import { Api } from '../../core/api.service';
     .sheet h3{margin:0 0 12px;color:var(--ink)} .sheet .input{margin-bottom:10px}
     .actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
     .ghost{background:#fff;border:1px solid var(--ink);color:var(--ink)} .e{color:var(--bad);margin-bottom:8px}
+    .sm{padding:6px 10px;font-size:12px}
+    .danger{border-color:var(--bad);color:var(--bad)}
   `],
 })
 export class Utilisateurs implements OnInit {
   items = signal<any[]>([]); loading = signal(true); show = signal(false); err = signal<string | null>(null);
+  busy = signal(false); erreur = signal<string | null>(null);
   form: any = { name: '', email: '', telephone: '', password: '' };
   constructor(private api: Api) {}
   async ngOnInit() { await this.load(); }
@@ -58,4 +64,22 @@ export class Utilisateurs implements OnInit {
     catch (e: any) { this.err.set(e?.error?.message || e?.error?.errors?.email?.[0] || 'Erreur.'); }
   }
   ini(n: string) { const p = (n || '?').trim().split(' ').filter(Boolean); return (p.length > 1 ? p[0][0] + p[p.length - 1][0] : (p[0] || '?').slice(0, 1)).toUpperCase(); }
+
+  async togglerActif(u: any) {
+    this.erreur.set(null); this.busy.set(true);
+    try { await this.api.put(`/admins/${u.id}/actif`, {}); await this.load(); }
+    catch (e: any) { this.erreur.set(e?.error?.message || 'Action impossible.'); }
+    finally { this.busy.set(false); }
+  }
+
+  async supprimer(u: any) {
+    this.erreur.set(null);
+    if (!confirm(`Supprimer définitivement le compte de ${u.name} ? Irréversible.`)) return;
+    const code = prompt('Code de suppression :');
+    if (!code) return;
+    this.busy.set(true);
+    try { await this.api.del(`/admins/${u.id}`, { code_suppression: code }); await this.load(); }
+    catch (e: any) { this.erreur.set(e?.error?.message || 'Suppression impossible.'); }
+    finally { this.busy.set(false); }
+  }
 }

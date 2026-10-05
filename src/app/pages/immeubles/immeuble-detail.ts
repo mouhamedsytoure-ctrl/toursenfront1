@@ -67,11 +67,13 @@ import { AuthService } from '../../core/auth.service';
               </div>
               @if (admin()) {
                 <button class="addph" [disabled]="up()" (click)="pick('image/*','logement',l.id)">＋ photo</button>
+                <button class="addph" [disabled]="up()" (click)="supprimerLogement(l)">🗑</button>
               }
             </div>
           }
         </div>
       }
+      @if (errLogement()) { <div class="errm">{{ errLogement() }}</div> }
 
       @if (modalLg()) {
         <div class="modal" (click)="modalLg.set(false)">
@@ -249,6 +251,19 @@ export class ImmeubleDetail implements OnInit {
     finally { this.up.set(false); }
   }
   zoom(u: string) { this.big.set(u); }
+
+  errLogement = signal<string | null>(null);
+  async supprimerLogement(l: any) {
+    this.errLogement.set(null);
+    if (!confirm(`Supprimer définitivement "${l.reference}" ? Impossible s'il a un historique de contrat.`)) return;
+    this.up.set(true);
+    try {
+      await firstValueFrom(this.http.delete(environment.apiUrl + '/logements/' + l.id));
+      await this.reload();
+    } catch (e: any) {
+      this.errLogement.set(e?.error?.message || 'Suppression impossible.');
+    } finally { this.up.set(false); }
+  }
 
   // --- upload / suppression / couverture ---
   pick(accept: string, type: string, id: number) {

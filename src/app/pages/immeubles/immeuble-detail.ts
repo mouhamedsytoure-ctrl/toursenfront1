@@ -1,5 +1,5 @@
 import { Component, signal, OnInit } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -31,8 +31,10 @@ import { AuthService } from '../../core/auth.service';
         <div class="tools">
           <button class="btn ink" [disabled]="up()" (click)="pick('image/*','immeuble',m.id)">📷 Ajouter une photo</button>
           <button class="btn gold" [disabled]="up()" (click)="pick('video/*','immeuble',m.id)">🎥 Ajouter/Remplacer la vidéo</button>
+          <button class="btn ink" [disabled]="up()" (click)="supprimerImmeuble(m)">🗑 Supprimer l'immeuble</button>
           @if (up()) { <span class="upmsg">Envoi en cours… {{ prog() }}</span> }
         </div>
+        @if (errImmeuble()) { <div class="errm">{{ errImmeuble() }}</div> }
       }
 
       @if (photos().length) {
@@ -202,7 +204,7 @@ export class ImmeubleDetail implements OnInit {
   private _galTitre = '';
   fcfa = fcfa;
 
-  constructor(private api: Api, private route: ActivatedRoute, private http: HttpClient, private auth: AuthService) {}
+  constructor(private api: Api, private route: ActivatedRoute, private http: HttpClient, private auth: AuthService, private router: Router) {}
 
   admin() { const r = this.auth.role(); return r === 'admin' || r === 'super_admin'; }
 
@@ -251,6 +253,19 @@ export class ImmeubleDetail implements OnInit {
     finally { this.up.set(false); }
   }
   zoom(u: string) { this.big.set(u); }
+
+  errImmeuble = signal<string | null>(null);
+  async supprimerImmeuble(m: any) {
+    this.errImmeuble.set(null);
+    if (!confirm(`Supprimer définitivement l'immeuble "${m.nom}" et tous ses logements ? Impossible si un logement a un historique de contrat.`)) return;
+    this.up.set(true);
+    try {
+      await firstValueFrom(this.http.delete(environment.apiUrl + '/immeubles/' + m.id));
+      this.router.navigate(['/app/immeubles']);
+    } catch (e: any) {
+      this.errImmeuble.set(e?.error?.message || 'Suppression impossible.');
+    } finally { this.up.set(false); }
+  }
 
   errLogement = signal<string | null>(null);
   async supprimerLogement(l: any) {

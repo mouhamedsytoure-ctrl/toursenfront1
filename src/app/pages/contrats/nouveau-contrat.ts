@@ -112,11 +112,11 @@ import { SignaturePad } from '../../shared/signature-pad';
         <option [ngValue]="4">4 mois</option>
         <option [ngValue]="null">Personnalisé (saisie libre)</option>
       </select>
-      <label class="flabel">Caution (FCFA) <span class="req">*</span></label>
-      <input class="input" [class.inp-err]="submitted&&!f.caution" type="number" placeholder="ex: 300000" [(ngModel)]="f.caution" [disabled]="moisCaution !== null"/>
+      <label class="flabel">Caution (FCFA)</label>
+      <input class="input" type="number" placeholder="ex: 300000" [(ngModel)]="f.caution" [disabled]="moisCaution !== null"/>
       <p class="hint">@if (moisCaution !== null) { Calculée automatiquement ({{ moisCaution }} mois de loyer). } @else { Saisie libre — modifiez le montant directement. }</p>
-      <label class="flabel">Jour d'échéance <span class="req">*</span></label>
-      <input class="input" [class.inp-err]="submitted&&!f.jour_echeance" type="number" placeholder="1 à 31" [(ngModel)]="f.jour_echeance"/>
+      <label class="flabel">Jour d'échéance</label>
+      <input class="input" type="number" placeholder="1 à 31 (par défaut : 5)" [(ngModel)]="f.jour_echeance"/>
       <label class="flabel">Mot de passe (laisser vide = généré automatiquement)</label>
       <input class="input" placeholder="Optionnel" [(ngModel)]="f.password"/>
     </div>
@@ -252,17 +252,15 @@ export class NouveauContrat implements OnInit {
     this.submitted = true;
     this.error.set(null);
     if (!this.chambre) { this.error.set('Choisissez un logement.'); return; }
-    // le reste (civilite, telephone, adresse...) est optionnel, meme regle que le serveur
+    // seuls nom/email/loyer/dates sont obligatoires (voir le hint au-dessus du formulaire) ;
+    // le reste (civilite, telephone, adresse, caution, jour d'echeance...) est optionnel,
+    // meme regle que le serveur, qui applique ses propres valeurs par defaut si absent
     const manquants = [];
     if (!this.f.preneur_nom) manquants.push('Nom');
     if (!this.f.preneur_email) manquants.push('Email');
     if (!this.f.date_debut) manquants.push('Date de début');
     if (!this.f.date_fin) manquants.push('Date de fin');
     if (!this.f.montant_loyer) manquants.push('Loyer');
-    if (!this.f.date_fin) manquants.push('Date de fin');
-    if (!this.f.montant_loyer) manquants.push('Loyer');
-    if (!this.f.caution) manquants.push('Caution');
-    if (!this.f.jour_echeance) manquants.push("Jour d'échéance");
     if (manquants.length > 0) { this.error.set('Champs obligatoires manquants : ' + manquants.join(', ')); return; }
     if (this.dnJour && this.dnMois && this.dnAnnee) {
       this.f.preneur_date_naissance = `${this.dnAnnee}-${this.dnMois}-${this.dnJour}`;
